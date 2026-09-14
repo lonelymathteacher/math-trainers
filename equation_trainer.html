@@ -1,0 +1,1924 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Équations du premier degré</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Space+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --paper: #EFF3F6;
+    --ink: #1B2A4A;
+    --ink-soft: #4A5670;
+    --card: #FFFFFF;
+    --border: #D8DEE6;
+    --accent: #2F6F72;
+    --good: #2F7D4F;
+    --bad: #B23A2E;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100%;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .wrap {
+    padding: 28px 20px 48px;
+    display: flex;
+    justify-content: center;
+  }
+  .col { width: 100%; max-width: 620px; }
+  .header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 28px;
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+  .subtitle { color: var(--ink-soft); font-size: 14px; margin: 0; max-width: 34ch; }
+  .scorebox { text-align: right; font-size: 13px; color: var(--ink-soft); line-height: 1.5; }
+  .scorebox b { color: var(--ink); font-family: 'JetBrains Mono', monospace; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+  .chip {
+    font-size: 12.5px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .chip.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(47,111,114,0.08);
+    font-weight: 500;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--type-color, #2F6F72);
+    border-radius: 8px;
+    padding: 28px 26px;
+  }
+  .type-label { font-size: 13px; color: var(--type-color, #2F6F72); margin: 0 0 14px; font-weight: 500; }
+
+  .eq-display {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 24px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    line-height: 1.3;
+  }
+  .eq-text { white-space: pre; }
+  .eq-frac { display: inline-flex; flex-direction: column; align-items: center; margin: 0 2px; }
+  .eq-frac-num { padding: 0 4px 2px; border-bottom: 2px solid var(--ink); }
+  .eq-frac-den { padding: 2px 4px 0; }
+  .eq-sqrt { display: inline-flex; align-items: flex-start; }
+  .eq-sqrt-sign { font-size: 24px; margin-right: 1px; transform: translateY(-1px); }
+  .eq-sqrt-content { border-top: 2px solid var(--ink); padding: 0 3px; }
+
+  .input-row { display: flex; gap: 10px; margin-top: 24px; flex-wrap: wrap; }
+  .input-row input {
+    flex: 1;
+    min-width: 200px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    padding: 10px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .input-row input:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+  button {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 6px;
+    border: none;
+    padding: 10px 18px;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+  }
+  button:hover { opacity: 0.88; }
+  button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .btn-primary { background: var(--ink); color: white; }
+  .btn-ghost { background: transparent; color: var(--ink-soft); border: 1px solid var(--border); }
+  .btn-ghost:disabled { opacity: 0.4; cursor: default; }
+
+  .feedback { margin-top: 14px; font-size: 14px; font-weight: 500; }
+  .feedback.correct { color: var(--good); }
+  .feedback.incorrect { color: var(--bad); }
+  .hint { font-size: 12.5px; color: var(--ink-soft); margin-top: 8px; }
+
+  .choices { display: flex; flex-direction: column; gap: 8px; margin-top: 20px; }
+  .choice-btn {
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    padding: 10px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .choice-btn:hover:not(:disabled) { border-color: var(--accent); }
+  .choice-btn.correct { border-color: var(--good); background: rgba(47,125,79,0.12); color: var(--good); font-weight: 500; }
+  .choice-btn.incorrect { border-color: var(--bad); background: rgba(178,58,46,0.12); color: var(--bad); font-weight: 500; }
+  .choice-btn:disabled { cursor: default; opacity: 0.85; }
+
+  .cards { display: flex; flex-direction: column; gap: 20px; }
+
+  .actions-row { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; flex-wrap: wrap; gap: 10px; }
+
+  .steps { margin-top: 16px; border-top: 1px solid var(--border); padding-top: 16px; }
+  .step-line {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .step-line:last-child { border-bottom: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="col">
+    <div class="header-row">
+      <div>
+        <h1>Équations du premier degré</h1>
+        <p class="subtitle">Un exercice généré aléatoirement à chaque fois, avec correction détaillée.</p>
+      </div>
+      <div class="scorebox">
+        <div>Score <b id="scoreVal">0/0</b></div>
+        <div>Série en cours <b id="streakVal">0</b></div>
+      </div>
+    </div>
+
+    <div class="chips" id="chips"></div>
+
+    <div class="cards" id="cardsContainer"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---------- Math helpers ----------
+  function gcd(a, b) {
+    a = Math.abs(a); b = Math.abs(b);
+    while (b) { const t = a % b; a = b; b = t; }
+    return a || 1;
+  }
+  function makeFrac(num, den) {
+    if (den < 0) { num = -num; den = -den; }
+    const g = gcd(num, den) || 1;
+    return { num: num / g, den: den / g };
+  }
+  function fracEq(a, b) { return a.num * b.den === b.num * a.den; }
+  function fracToStr(f) { return f.den === 1 ? `${f.num}` : `${f.num}/${f.den}`; }
+  function fracToNum(f) { return f.num / f.den; }
+  function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+  function randNonZero(min, max) { let v = 0; while (v === 0) v = randInt(min, max); return v; }
+
+  function termX(coef) {
+    if (coef === 1) return 'x';
+    if (coef === -1) return '-x';
+    return `${coef}x`;
+  }
+  function termX2(coef) {
+    if (coef === 1) return 'x²';
+    if (coef === -1) return '-x²';
+    return `${coef}x²`;
+  }
+  function signedAfter(n) { return n >= 0 ? `+ ${n}` : `- ${Math.abs(n)}`; }
+  function signedInline(n) { return n >= 0 ? `${n}` : `-${Math.abs(n)}`; }
+  // "+ 5u" / "- u" / "+ (x + 3)" style term, coefficient 1/-1 shown bare
+  function coefTerm(n, varStr) {
+    const sign = n >= 0 ? '+' : '-';
+    const abs = Math.abs(n);
+    const coefStr = abs === 1 ? '' : `${abs}`;
+    return `${sign} ${coefStr}${varStr}`;
+  }
+  function xPow(n) {
+    const sup = { 1: '', 2: '²', 3: '³', 4: '⁴', 5: '⁵' };
+    return n === 1 ? 'x' : `x${sup[n] || `^${n}`}`;
+  }
+  // General superscript for any integer exponent (negative included), any base.
+  function toSup(n) {
+    const SUP = { '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹', '-': '⁻' };
+    return String(n).split('').map(ch => SUP[ch] || ch).join('');
+  }
+  function expStr(base, exp) {
+    return exp === 1 ? `${base}` : `${base}${toSup(exp)}`;
+  }
+  function termVarPow(coef, powStr) {
+    if (coef === 1) return powStr;
+    if (coef === -1) return `-${powStr}`;
+    return `${coef}${powStr}`;
+  }
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+  // Picks up to `count` strings from `candidates` that are distinct from `correct` and from each other.
+  function pickDistinct(correct, candidates, count) {
+    const seen = new Set([correct]);
+    const out = [];
+    for (const s of candidates) {
+      if (out.length >= count) break;
+      if (!seen.has(s)) { seen.add(s); out.push(s); }
+    }
+    return out;
+  }
+
+  // ---------- Equation generators ----------
+  function genSimple() {
+    const a = randNonZero(-9, 9);
+    const b = randInt(-15, 15);
+    const c = randInt(-15, 15);
+    const answer = makeFrac(c - b, a);
+    const eqStr = `${termX(a)} ${signedAfter(b)} = ${c}`;
+    const steps = [
+      eqStr,
+      `${termX(a)} = ${signedInline(c - b)}`,
+      `x = ${c - b}/${a} = ${fracToStr(answer)}`,
+    ];
+    return {
+      typeKey: 'simple', typeLabel: 'Équation simple', color: '#2F6F72',
+      segments: [{ type: 'text', value: eqStr }],
+      steps, answerKind: 'value', answerFrac: answer,
+    };
+  }
+
+  function genParentheses() {
+    const variant = Math.random() < 0.5 ? 1 : 2;
+    let a;
+    do { a = randNonZero(-6, 6); } while (a === 1);
+    const b = randInt(-9, 9);
+    if (variant === 1) {
+      const c = randInt(-20, 20);
+      const answer = makeFrac(c - a * b, a);
+      const eqStr = `${a}(x ${signedAfter(b)}) = ${c}`;
+      const steps = [
+        eqStr,
+        `${termX(a)} ${signedAfter(a * b)} = ${c}`,
+        `${termX(a)} = ${signedInline(c - a * b)}`,
+        `x = ${fracToStr(answer)}`,
+      ];
+      return {
+        typeKey: 'parentheses', typeLabel: 'Avec parenthèses', color: '#5B5A9C',
+        segments: [{ type: 'text', value: eqStr }], steps, answerKind: 'value', answerFrac: answer,
+      };
+    } else {
+      let d;
+      do { d = randNonZero(-6, 6); } while (d === a);
+      const e = randInt(-15, 15);
+      const answer = makeFrac(e - a * b, a - d);
+      const eqStr = `${a}(x ${signedAfter(b)}) = ${termX(d)} ${signedAfter(e)}`;
+      const steps = [
+        eqStr,
+        `${termX(a)} ${signedAfter(a * b)} = ${termX(d)} ${signedAfter(e)}`,
+        `${termX(a - d)} = ${signedInline(e - a * b)}`,
+        `x = ${fracToStr(answer)}`,
+      ];
+      return {
+        typeKey: 'parentheses', typeLabel: 'Avec parenthèses', color: '#5B5A9C',
+        segments: [{ type: 'text', value: eqStr }], steps, answerKind: 'value', answerFrac: answer,
+      };
+    }
+  }
+
+  function genBothSides() {
+    const special = Math.random() < 0.15;
+    if (special) {
+      const a = randNonZero(-8, 8);
+      const c = a;
+      const same = Math.random() < 0.5;
+      const b = randInt(-15, 15);
+      const d = same ? b : b + randNonZero(1, 8) * (Math.random() < 0.5 ? 1 : -1);
+      const eqStr = `${termX(a)} ${signedAfter(b)} = ${termX(c)} ${signedAfter(d)}`;
+      if (same) {
+        return {
+          typeKey: 'bothsides', typeLabel: 'Cas particulier', color: '#9C6B23',
+          segments: [{ type: 'text', value: eqStr }],
+          steps: [eqStr, '0 = 0', 'Vrai pour tout x : infinité de solutions'],
+          answerKind: 'all',
+        };
+      } else {
+        return {
+          typeKey: 'bothsides', typeLabel: 'Cas particulier', color: '#9C6B23',
+          segments: [{ type: 'text', value: eqStr }],
+          steps: [eqStr, `0 = ${signedInline(d - b)}`, 'Affirmation fausse : aucune solution'],
+          answerKind: 'none',
+        };
+      }
+    }
+    let a, c;
+    do { a = randNonZero(-9, 9); c = randNonZero(-9, 9); } while (a === c);
+    const b = randInt(-15, 15);
+    const d = randInt(-15, 15);
+    const answer = makeFrac(d - b, a - c);
+    const eqStr = `${termX(a)} ${signedAfter(b)} = ${termX(c)} ${signedAfter(d)}`;
+    const steps = [
+      eqStr,
+      `${termX(a - c)} ${signedAfter(b)} = ${d}`,
+      `${termX(a - c)} = ${signedInline(d - b)}`,
+      `x = ${fracToStr(answer)}`,
+    ];
+    return {
+      typeKey: 'bothsides', typeLabel: 'Variable des deux côtés', color: '#9C6B23',
+      segments: [{ type: 'text', value: eqStr }], steps, answerKind: 'value', answerFrac: answer,
+    };
+  }
+
+  function genFractions() {
+    const variant = randInt(1, 4);
+    if (variant === 1) {
+      const a = randNonZero(-6, 6);
+      const c = randNonZero(2, 6);
+      const b = randInt(-10, 10);
+      const d = randInt(-6, 6);
+      const answer = makeFrac(c * d - b, a);
+      const numStr = `${termX(a)} ${signedAfter(b)}`;
+      const eqStr = `(${numStr})/${c} = ${d}`;
+      return {
+        typeKey: 'fractions', typeLabel: 'Avec fractions', color: '#8C4A5B',
+        segments: [{ type: 'frac', num: numStr, den: `${c}` }, { type: 'text', value: '=' }, { type: 'text', value: `${d}` }],
+        steps: [eqStr, `${numStr} = ${c} × ${d} = ${c * d}`, `${termX(a)} = ${signedInline(c * d - b)}`, `x = ${fracToStr(answer)}`],
+        answerKind: 'value', answerFrac: answer,
+      };
+    }
+
+    if (variant === 2) {
+      let a, f;
+      let attempts = 0;
+      do { a = randNonZero(-6, 6); f = randNonZero(-6, 6); attempts++; } while (a === f && attempts < 30);
+      const b = randInt(-10, 10);
+      let e = randNonZero(-8, 8);
+      let answer = makeFrac(f * e - b, a - f);
+      let xVal = fracToNum(answer);
+      let guard = 0;
+      while (Math.abs(xVal - (-e)) < 1e-9 && guard < 20) {
+        e = randNonZero(-8, 8);
+        answer = makeFrac(f * e - b, a - f);
+        xVal = fracToNum(answer);
+        guard++;
+      }
+      const numStr = `${termX(a)} ${signedAfter(b)}`;
+      const denStr = `x ${signedAfter(e)}`;
+      const eqStr = `(${numStr})/(${denStr}) = ${f}`;
+      return {
+        typeKey: 'fractions', typeLabel: 'Avec fractions', color: '#8C4A5B',
+        segments: [{ type: 'frac', num: numStr, den: denStr }, { type: 'text', value: '=' }, { type: 'text', value: `${f}` }],
+        steps: [eqStr, `${numStr} = ${f}(${denStr}) = ${termX(f)} ${signedAfter(f * e)}`, `${termX(a - f)} = ${signedInline(f * e - b)}`, `x = ${fracToStr(answer)}`],
+        answerKind: 'value', answerFrac: answer, excludedFrac: makeFrac(-e, 1),
+      };
+    }
+
+    if (variant === 3) {
+      // p/(ax+b) = m/n  (variable in the denominator, fraction on both sides)
+      const a = randNonZero(-6, 6);
+      const b = randInt(-9, 9);
+      const p = randNonZero(-9, 9);
+      const m = randNonZero(-6, 6);
+      const n = randNonZero(2, 6);
+      const answer = makeFrac(p * n - b * m, a * m);
+      const denStr = `${termX(a)} ${signedAfter(b)}`;
+      const eqStr = `${p}/(${denStr}) = ${m}/${n}`;
+      return {
+        typeKey: 'fractions', typeLabel: 'Avec fractions', color: '#8C4A5B',
+        segments: [{ type: 'frac', num: `${p}`, den: denStr }, { type: 'text', value: '=' }, { type: 'frac', num: `${m}`, den: `${n}` }],
+        steps: [
+          eqStr,
+          `${p} × ${n} = ${m} × (${denStr})`,
+          `${p * n} = ${termX(a * m)} ${signedAfter(b * m)}`,
+          `${termX(-a * m)} = ${signedInline(b * m - p * n)}`,
+          `x = ${fracToStr(answer)}`,
+        ],
+        answerKind: 'value', answerFrac: answer, excludedFrac: makeFrac(-b, a),
+      };
+    }
+
+    // variant 4: (ax+b)/(cx+d) = m/n  (variable on both sides, fraction on both sides)
+    let a, c, m, n;
+    do {
+      a = randNonZero(-6, 6);
+      c = randNonZero(-6, 6);
+      m = randNonZero(-6, 6);
+      n = randNonZero(2, 6);
+    } while (n * a === m * c);
+    const b = randInt(-9, 9);
+    const d = randInt(-9, 9);
+    const answer = makeFrac(m * d - n * b, n * a - m * c);
+    const numStr = `${termX(a)} ${signedAfter(b)}`;
+    const denStr = `${termX(c)} ${signedAfter(d)}`;
+    const eqStr = `(${numStr})/(${denStr}) = ${m}/${n}`;
+    return {
+      typeKey: 'fractions', typeLabel: 'Avec fractions', color: '#8C4A5B',
+      segments: [{ type: 'frac', num: numStr, den: denStr }, { type: 'text', value: '=' }, { type: 'frac', num: `${m}`, den: `${n}` }],
+      steps: [
+        eqStr,
+        `${n}(${numStr}) = ${m}(${denStr})`,
+        `${termX(n * a)} ${signedAfter(n * b)} = ${termX(m * c)} ${signedAfter(m * d)}`,
+        `${termX(n * a - m * c)} = ${signedInline(m * d - n * b)}`,
+        `x = ${fracToStr(answer)}`,
+      ],
+      answerKind: 'value', answerFrac: answer, excludedFrac: makeFrac(-d, c),
+    };
+  }
+
+  function genSqrt() {
+    const variant = randInt(1, 4);
+    if (variant === 1) {
+      const a = randNonZero(-6, 6);
+      const b = randInt(-10, 10);
+      const noSolution = Math.random() < 0.25;
+      const c = noSolution ? -randInt(1, 5) : randInt(0, 6);
+      const eqStr = `√(${termX(a)} ${signedAfter(b)}) = ${c}`;
+      if (noSolution) {
+        return {
+          typeKey: 'sqrt', typeLabel: 'Avec racine carrée', color: '#3B6EA5',
+          segments: [{ type: 'sqrt', content: `${termX(a)} ${signedAfter(b)}` }, { type: 'text', value: '=' }, { type: 'text', value: `${c}` }],
+          steps: [eqStr, 'Une racine carrée ne peut pas être négative', 'Aucune solution'],
+          answerKind: 'none',
+        };
+      }
+      const answer = makeFrac(c * c - b, a);
+      return {
+        typeKey: 'sqrt', typeLabel: 'Avec racine carrée', color: '#3B6EA5',
+        segments: [{ type: 'sqrt', content: `${termX(a)} ${signedAfter(b)}` }, { type: 'text', value: '=' }, { type: 'text', value: `${c}` }],
+        steps: [eqStr, `${termX(a)} ${signedAfter(b)} = ${c}² = ${c * c}`, `${termX(a)} = ${signedInline(c * c - b)}`, `x = ${fracToStr(answer)}`],
+        answerKind: 'value', answerFrac: answer,
+      };
+    }
+
+    if (variant === 2) {
+      let a, c;
+      do { a = randNonZero(-6, 6); c = randNonZero(-6, 6); } while (a === c);
+      const b = randInt(-10, 10);
+      const d = randInt(-10, 10);
+      const answer = makeFrac(d - b, a - c);
+      const value = a * answer.num + b * answer.den;
+      const eqStr = `√(${termX(a)} ${signedAfter(b)}) = √(${termX(c)} ${signedAfter(d)})`;
+      if (value < 0) {
+        return {
+          typeKey: 'sqrt', typeLabel: 'Avec racine carrée', color: '#3B6EA5',
+          segments: [{ type: 'sqrt', content: `${termX(a)} ${signedAfter(b)}` }, { type: 'text', value: '=' }, { type: 'sqrt', content: `${termX(c)} ${signedAfter(d)}` }],
+          steps: [eqStr, `${termX(a - c)} ${signedAfter(b)} = ${d}`, `x = ${fracToStr(answer)}, mais le résultat est négatif`, 'Aucune solution valide'],
+          answerKind: 'none',
+        };
+      }
+      return {
+        typeKey: 'sqrt', typeLabel: 'Avec racine carrée', color: '#3B6EA5',
+        segments: [{ type: 'sqrt', content: `${termX(a)} ${signedAfter(b)}` }, { type: 'text', value: '=' }, { type: 'sqrt', content: `${termX(c)} ${signedAfter(d)}` }],
+        steps: [eqStr, `${termX(a)} ${signedAfter(b)} = ${termX(c)} ${signedAfter(d)}`, `${termX(a - c)} = ${signedInline(d - b)}`, `x = ${fracToStr(answer)}`],
+        answerKind: 'value', answerFrac: answer,
+      };
+    }
+
+    if (variant === 3) {
+      // √(ax+b)/c = d
+      const a = randNonZero(-6, 6);
+      const b = randInt(-10, 10);
+      const c = randNonZero(-6, 6);
+      const d = randInt(-5, 5);
+      const eqStr = `√(${termX(a)} ${signedAfter(b)})/${c} = ${d}`;
+      const target = c * d;
+      if (target < 0) {
+        return {
+          typeKey: 'sqrt', typeLabel: 'Avec racine carrée', color: '#3B6EA5',
+          segments: [{ type: 'frac', num: `√(${termX(a)} ${signedAfter(b)})`, den: `${c}` }, { type: 'text', value: '=' }, { type: 'text', value: `${d}` }],
+          steps: [eqStr, 'Une racine carrée ne peut pas être négative', 'Aucune solution'],
+          answerKind: 'none',
+        };
+      }
+      const answer = makeFrac(target * target - b, a);
+      return {
+        typeKey: 'sqrt', typeLabel: 'Avec racine carrée', color: '#3B6EA5',
+        segments: [{ type: 'frac', num: `√(${termX(a)} ${signedAfter(b)})`, den: `${c}` }, { type: 'text', value: '=' }, { type: 'text', value: `${d}` }],
+        steps: [
+          eqStr,
+          `√(${termX(a)} ${signedAfter(b)}) = ${c} × ${d} = ${target}`,
+          `${termX(a)} ${signedAfter(b)} = ${target}² = ${target * target}`,
+          `${termX(a)} = ${signedInline(target * target - b)}`,
+          `x = ${fracToStr(answer)}`,
+        ],
+        answerKind: 'value', answerFrac: answer,
+      };
+    }
+
+    // variant 4: (√(ax+b) + c)/d = e
+    const a = randNonZero(-6, 6);
+    const b = randInt(-10, 10);
+    const c = randInt(-6, 6);
+    const d = randNonZero(2, 5);
+    const e = randInt(-5, 5);
+    const sqrtPart = `√(${termX(a)} ${signedAfter(b)}) ${signedAfter(c)}`;
+    const eqStr = `(${sqrtPart})/${d} = ${e}`;
+    const target = d * e - c;
+    if (target < 0) {
+      return {
+        typeKey: 'sqrt', typeLabel: 'Avec racine carrée', color: '#3B6EA5',
+        segments: [{ type: 'frac', num: sqrtPart, den: `${d}` }, { type: 'text', value: '=' }, { type: 'text', value: `${e}` }],
+        steps: [eqStr, 'Une racine carrée ne peut pas être négative', 'Aucune solution'],
+        answerKind: 'none',
+      };
+    }
+    const answer = makeFrac(target * target - b, a);
+    return {
+      typeKey: 'sqrt', typeLabel: 'Avec racine carrée', color: '#3B6EA5',
+      segments: [{ type: 'frac', num: sqrtPart, den: `${d}` }, { type: 'text', value: '=' }, { type: 'text', value: `${e}` }],
+      steps: [
+        eqStr,
+        `${sqrtPart} = ${d} × ${e} = ${d * e}`,
+        `√(${termX(a)} ${signedAfter(b)}) = ${signedInline(target)}`,
+        `${termX(a)} ${signedAfter(b)} = ${target}² = ${target * target}`,
+        `${termX(a)} = ${signedInline(target * target - b)}`,
+        `x = ${fracToStr(answer)}`,
+      ],
+      answerKind: 'value', answerFrac: answer,
+    };
+  }
+
+  function genQuadratic() {
+    const variant = randInt(1, 4);
+
+    if (variant === 1) {
+      const a = randNonZero(1, 4);
+      const b = randNonZero(-6, 6);
+      const eqStr = `${termX2(a)} ${signedAfter(b)}x = 0`;
+      return {
+        typeKey: 'quadratic', typeLabel: '2nd degré (Facteur commun)', color: '#B23A2E',
+        segments: [{ type: 'text', value: eqStr }],
+        steps: [eqStr, `x(${termX(a)} ${signedAfter(b)}) = 0`, `x = 0 ou x = ${fracToStr(makeFrac(-b, a))}`],
+        answerKind: 'values',
+        answerFracs: [makeFrac(0, 1), makeFrac(-b, a)].sort((x, y) => x.num / x.den - y.num / y.den)
+      };
+    }
+
+    if (variant === 2) {
+      const r = randNonZero(2, 9);
+      const eqStr = `x² - ${r * r} = 0`;
+      return {
+        typeKey: 'quadratic', typeLabel: '2nd degré (Différence de carrés)', color: '#B23A2E',
+        segments: [{ type: 'text', value: eqStr }],
+        steps: [eqStr, `(x - ${r})(x + ${r}) = 0`, `x = ${r} ou x = -${r}`],
+        answerKind: 'values',
+        answerFracs: [makeFrac(r, 1), makeFrac(-r, 1)].sort((x, y) => x.num / x.den - y.num / y.den)
+      };
+    }
+
+    if (variant === 3) {
+      const r = randNonZero(1, 6);
+      const sign = Math.random() < 0.5 ? 1 : -1;
+      const b = 2 * r * sign;
+      const c = r * r;
+      const eqStr = `x² ${signedAfter(b)}x ${signedAfter(c)} = 0`;
+      const factored = sign === 1 ? `(x + ${r})² = 0` : `(x - ${r})² = 0`;
+      return {
+        typeKey: 'quadratic', typeLabel: '2nd degré (Carré parfait)', color: '#B23A2E',
+        segments: [{ type: 'text', value: eqStr }],
+        steps: [eqStr, factored, `x = ${sign * r}`],
+        answerKind: 'values',
+        answerFracs: [makeFrac(sign * r, 1)]
+      };
+    }
+
+    // variant === 4
+    let r1, r2;
+    do {
+      r1 = randNonZero(-9, 9);
+      r2 = randNonZero(-9, 9);
+    } while (r1 === r2);
+
+    const s = -(r1 + r2);
+    const p = r1 * r2;
+    const eqStr = `x² ${signedAfter(s)}x ${signedAfter(p)} = 0`;
+    return {
+      typeKey: 'quadratic', typeLabel: '2nd degré (Factorisation)', color: '#B23A2E',
+      segments: [{ type: 'text', value: eqStr }],
+      steps: [eqStr, `(x ${signedAfter(-r1)})(x ${signedAfter(-r2)}) = 0`, `x = ${r1} ou x = ${r2}`],
+      answerKind: 'values',
+      answerFracs: [makeFrac(r1, 1), makeFrac(r2, 1)].sort((x, y) => x.num / x.den - y.num / y.den)
+    };
+  }
+
+  // ---------- Zero-product equations (produit nul) ----------
+  function genZeroProduct() {
+    const variant = randInt(1, 3);
+
+    if (variant === 1) {
+      // (ax+b)(cx+d) = 0
+      let a, b, c, d, r1, r2;
+      do {
+        a = randNonZero(-7, 7); c = randNonZero(-7, 7);
+        b = randInt(-9, 9); d = randInt(-9, 9);
+        r1 = makeFrac(-b, a); r2 = makeFrac(-d, c);
+      } while (fracEq(r1, r2));
+      const eqStr = `(${termX(a)} ${signedAfter(b)})(${termX(c)} ${signedAfter(d)}) = 0`;
+      const steps = [
+        eqStr,
+        `${termX(a)} ${signedAfter(b)} = 0 ou ${termX(c)} ${signedAfter(d)} = 0`,
+        `x = ${fracToStr(r1)} ou x = ${fracToStr(r2)}`,
+      ];
+      const answerFracs = [r1, r2].sort((p, q) => fracToNum(p) - fracToNum(q));
+      return {
+        typeKey: 'zeroproduct', typeLabel: 'Produit nul', color: '#C4622D',
+        segments: [{ type: 'text', value: eqStr }], steps, answerKind: 'values', answerFracs,
+      };
+    }
+
+    if (variant === 2) {
+      // x(ax+b) = 0
+      const a = randNonZero(-8, 8);
+      const b = randNonZero(-12, 12);
+      const r = makeFrac(-b, a);
+      const eqStr = `x(${termX(a)} ${signedAfter(b)}) = 0`;
+      const steps = [
+        eqStr,
+        `x = 0 ou ${termX(a)} ${signedAfter(b)} = 0`,
+        `x = 0 ou x = ${fracToStr(r)}`,
+      ];
+      const answerFracs = [makeFrac(0, 1), r].sort((p, q) => fracToNum(p) - fracToNum(q));
+      return {
+        typeKey: 'zeroproduct', typeLabel: 'Produit nul', color: '#C4622D',
+        segments: [{ type: 'text', value: eqStr }], steps, answerKind: 'values', answerFracs,
+      };
+    }
+
+    // variant 3: x^n(ax+b)(cx+d) = 0, n in {2,3}
+    const n = randInt(2, 3);
+    const powStr = n === 2 ? 'x²' : 'x³';
+    let a, b, c, d, r1, r2;
+    do {
+      a = randNonZero(-6, 6); c = randNonZero(-6, 6);
+      b = randInt(-9, 9); d = randInt(-9, 9);
+      r1 = makeFrac(-b, a); r2 = makeFrac(-d, c);
+    } while (fracToNum(r1) === 0 || fracToNum(r2) === 0 || fracEq(r1, r2));
+    const eqStr = `${powStr}(${termX(a)} ${signedAfter(b)})(${termX(c)} ${signedAfter(d)}) = 0`;
+    const steps = [
+      eqStr,
+      `${powStr} = 0 ou ${termX(a)} ${signedAfter(b)} = 0 ou ${termX(c)} ${signedAfter(d)} = 0`,
+      `x = 0 ou x = ${fracToStr(r1)} ou x = ${fracToStr(r2)}`,
+    ];
+    const answerFracs = [makeFrac(0, 1), r1, r2].sort((p, q) => fracToNum(p) - fracToNum(q));
+    return {
+      typeKey: 'zeroproduct', typeLabel: 'Produit nul', color: '#C4622D',
+      segments: [{ type: 'text', value: eqStr }], steps, answerKind: 'values', answerFracs,
+    };
+  }
+
+  // ---------- Common-factor equations (facteur commun) ----------
+  function genCommonFactor() {
+    const variant = Math.random() < 0.5 ? 1 : 2;
+    const sign = Math.random() < 0.5 ? 1 : -1;
+    const signChar = sign > 0 ? '+' : '−';
+
+    if (variant === 1) {
+      // m·x(p1x+q1) ± m·x(p2x+q2) = 0
+      let m, p1, q1, p2, q2, coefT, constT;
+      do {
+        m = randNonZero(-6, 6);
+        p1 = randInt(-6, 6); q1 = randInt(-9, 9);
+        p2 = randInt(-6, 6); q2 = randInt(-9, 9);
+        coefT = sign > 0 ? p1 + p2 : p1 - p2;
+        constT = sign > 0 ? q1 + q2 : q1 - q2;
+      } while (coefT === 0 || constT === 0);
+      const r = makeFrac(-constT, coefT);
+      const mx = termX(m);
+      const eqStr = `${mx}(${termX(p1)} ${signedAfter(q1)}) ${signChar} ${mx}(${termX(p2)} ${signedAfter(q2)}) = 0`;
+      const steps = [
+        eqStr,
+        `${mx}[(${termX(p1)} ${signedAfter(q1)}) ${signChar} (${termX(p2)} ${signedAfter(q2)})] = 0`,
+        `${mx}(${termX(coefT)} ${signedAfter(constT)}) = 0`,
+        `${mx} = 0 ou ${termX(coefT)} ${signedAfter(constT)} = 0`,
+        `x = 0 ou x = ${fracToStr(r)}`,
+      ];
+      const answerFracs = [makeFrac(0, 1), r].sort((p, q) => fracToNum(p) - fracToNum(q));
+      return {
+        typeKey: 'commonfactor', typeLabel: 'Facteur commun', color: '#2E8B57',
+        segments: [{ type: 'text', value: eqStr }], steps, answerKind: 'values', answerFracs,
+      };
+    }
+
+    // variant 2: (ax+b)(cx+d) ± (ax+b)(ex+f) = 0
+    let a, b, c, d, e, f, innerCoef, innerConst, r1, r2;
+    do {
+      a = randNonZero(-6, 6); b = randInt(-9, 9);
+      c = randInt(-6, 6); d = randInt(-9, 9);
+      e = randInt(-6, 6); f = randInt(-9, 9);
+      innerCoef = sign > 0 ? c + e : c - e;
+      innerConst = sign > 0 ? d + f : d - f;
+      r1 = makeFrac(-b, a);
+      r2 = innerCoef !== 0 ? makeFrac(-innerConst, innerCoef) : null;
+    } while (innerCoef === 0 || fracEq(r1, r2));
+    const factorStr = `(${termX(a)} ${signedAfter(b)})`;
+    const eqStr = `${factorStr}(${termX(c)} ${signedAfter(d)}) ${signChar} ${factorStr}(${termX(e)} ${signedAfter(f)}) = 0`;
+    const steps = [
+      eqStr,
+      `${factorStr}[(${termX(c)} ${signedAfter(d)}) ${signChar} (${termX(e)} ${signedAfter(f)})] = 0`,
+      `${factorStr}(${termX(innerCoef)} ${signedAfter(innerConst)}) = 0`,
+      `${termX(a)} ${signedAfter(b)} = 0 ou ${termX(innerCoef)} ${signedAfter(innerConst)} = 0`,
+      `x = ${fracToStr(r1)} ou x = ${fracToStr(r2)}`,
+    ];
+    const answerFracs = [r1, r2].sort((p, q) => fracToNum(p) - fracToNum(q));
+    return {
+      typeKey: 'commonfactor', typeLabel: 'Facteur commun', color: '#2E8B57',
+      segments: [{ type: 'text', value: eqStr }], steps, answerKind: 'values', answerFracs,
+    };
+  }
+
+  // ---------- General-form quadratics ax²+bx+c=0 (Viète) ----------
+  function genGeneralQuad() {
+    let a, r1, p2, r2Frac;
+    do {
+      a = randNonZero(-4, 4);
+      r1 = randInt(-7, 7);
+      p2 = randNonZero(-7, 7);
+      r2Frac = makeFrac(p2, a);
+    } while (fracEq(makeFrac(r1, 1), r2Frac));
+    const b = -(a * r1 + p2);
+    const c = r1 * p2;
+    const eqStr = `${termX2(a)} ${signedAfter(b)}x ${signedAfter(c)} = 0`;
+    const sumFrac = makeFrac(-b, a);
+    const prodFrac = makeFrac(c, a);
+    const steps = [
+      eqStr,
+      `Somme des racines = -b/a = ${fracToStr(sumFrac)} ; Produit des racines = c/a = ${fracToStr(prodFrac)}`,
+      `x = ${fracToStr(makeFrac(r1, 1))} ou x = ${fracToStr(r2Frac)}`,
+    ];
+    const answerFracs = [makeFrac(r1, 1), r2Frac].sort((p, q) => fracToNum(p) - fracToNum(q));
+    return {
+      typeKey: 'generalquad', typeLabel: 'Forme générale (ax²+bx+c)', color: '#A64AA0',
+      segments: [{ type: 'text', value: eqStr }], steps, answerKind: 'values', answerFracs,
+    };
+  }
+
+  // ---------- Equations by substitution: (x+k)² + s(x+k) + p = 0 ----------
+  function genSubstitution() {
+    let k, u1, u2;
+    do {
+      k = randNonZero(-7, 7);
+      u1 = randInt(-8, 8);
+      u2 = randInt(-8, 8);
+    } while (u1 === u2 || (u1 + u2) === 0);
+    const s = -(u1 + u2);
+    const p = u1 * u2;
+    const shiftStr = `(x ${signedAfter(k)})`;
+    const eqStr = `${shiftStr}² ${coefTerm(s, shiftStr)} ${signedAfter(p)} = 0`;
+    const x1 = u1 - k;
+    const x2 = u2 - k;
+    const steps = [
+      eqStr,
+      `Poser u = x ${signedAfter(k)} : u² ${coefTerm(s, 'u')} ${signedAfter(p)} = 0`,
+      `(u ${signedAfter(-u1)})(u ${signedAfter(-u2)}) = 0 ⇒ u = ${u1} ou u = ${u2}`,
+      `x ${signedAfter(k)} = ${u1} ou x ${signedAfter(k)} = ${u2}`,
+      `x = ${x1} ou x = ${x2}`,
+    ];
+    const answerFracs = [makeFrac(x1, 1), makeFrac(x2, 1)].sort((p, q) => fracToNum(p) - fracToNum(q));
+    return {
+      typeKey: 'substitution', typeLabel: 'Par substitution', color: '#1B5E6B',
+      segments: [{ type: 'text', value: eqStr }], steps, answerKind: 'values', answerFracs,
+    };
+  }
+
+  // ---------- Find a parameter from given roots ----------
+  function genFindParam() {
+    const p = randNonZero(-8, 8);
+    const q = randNonZero(-6, 6);
+    const r1 = -p;
+    let r2;
+    do { r2 = randInt(-10, 10); } while (r2 === r1);
+    const k = q * r2;
+    const eqStr = `(x ${signedAfter(p)})(${termX(q)} − k) = 0`;
+    const promptNote = `Sachant que les solutions sont x = ${r1} et x = ${r2}, déterminez k.`;
+    const steps = [
+      `Pour x = ${r2} : ${termX(q)} − k = 0`,
+      `${q} × ${r2} − k = 0`,
+      `k = ${q} × ${r2} = ${k}`,
+    ];
+    return {
+      typeKey: 'findparam', typeLabel: 'Trouver un paramètre', color: '#6E6E3A',
+      segments: [{ type: 'text', value: eqStr }], promptNote,
+      steps, answerKind: 'value', answerFrac: makeFrac(k, 1),
+    };
+  }
+
+  // ---------- Coefficients from given roots (Viète, partial info) ----------
+  function genCoeffRoots() {
+    const variant = randInt(1, 4);
+
+    if (variant === 1) {
+      // a given, roots given -> find b, c
+      const a = randNonZero(-4, 4);
+      let r1, r2;
+      do { r1 = randInt(-8, 8); r2 = randInt(-8, 8); } while (r1 === r2);
+      const b = -a * (r1 + r2);
+      const c = a * r1 * r2;
+      const eqStr = `${termX2(a)} + bx + c = 0`;
+      const promptNote = `Les solutions sont x = ${r1} et x = ${r2}. Déterminez b et c.`;
+      const steps = [
+        `b = -a(x₁ + x₂) = -(${a})(${r1} + ${r2}) = ${b}`,
+        `c = a × x₁ × x₂ = ${a} × ${r1} × ${r2} = ${c}`,
+      ];
+      return {
+        typeKey: 'coeffroots', typeLabel: 'Coefficients à partir des racines', color: '#5C7AAE',
+        segments: [{ type: 'text', value: eqStr }], promptNote,
+        steps, answerKind: 'tuple', answerLabels: ['b', 'c'],
+        answerFracs: [makeFrac(b, 1), makeFrac(c, 1)],
+      };
+    }
+
+    if (variant === 2) {
+      // c and roots given, a is a positive integer -> find a, b
+      let a, r1, r2;
+      do {
+        a = randInt(1, 6); r1 = randInt(-7, 7); r2 = randInt(-7, 7);
+      } while (r1 === 0 || r2 === 0 || r1 === r2);
+      const c = a * r1 * r2;
+      const b = -a * (r1 + r2);
+      const eqStr = `ax² + bx ${signedAfter(c)} = 0`;
+      const promptNote = `Les solutions sont x = ${r1} et x = ${r2}, avec a entier positif. Déterminez a et b.`;
+      const steps = [
+        `a × x₁ × x₂ = c ⇒ a = ${c} / (${r1} × ${r2}) = ${a}`,
+        `b = -a(x₁ + x₂) = -(${a})(${r1} + ${r2}) = ${b}`,
+      ];
+      return {
+        typeKey: 'coeffroots', typeLabel: 'Coefficients à partir des racines', color: '#5C7AAE',
+        segments: [{ type: 'text', value: eqStr }], promptNote,
+        steps, answerKind: 'tuple', answerLabels: ['a', 'b'],
+        answerFracs: [makeFrac(a, 1), makeFrac(b, 1)],
+      };
+    }
+
+    if (variant === 3) {
+      // b and roots given -> find a, c
+      let a, r1, r2;
+      do {
+        a = randNonZero(-6, 6); r1 = randInt(-7, 7); r2 = randInt(-7, 7);
+      } while (r1 === r2 || (r1 + r2) === 0);
+      const b = -a * (r1 + r2);
+      const c = a * r1 * r2;
+      const eqStr = `ax² ${signedAfter(b)}x + c = 0`;
+      const promptNote = `Les solutions sont x = ${r1} et x = ${r2}. Déterminez a et c.`;
+      const steps = [
+        `-a(x₁ + x₂) = b ⇒ a = ${b} / -(${r1} + ${r2}) = ${a}`,
+        `c = a × x₁ × x₂ = ${a} × ${r1} × ${r2} = ${c}`,
+      ];
+      return {
+        typeKey: 'coeffroots', typeLabel: 'Coefficients à partir des racines', color: '#5C7AAE',
+        segments: [{ type: 'text', value: eqStr }], promptNote,
+        steps, answerKind: 'tuple', answerLabels: ['a', 'c'],
+        answerFracs: [makeFrac(a, 1), makeFrac(c, 1)],
+      };
+    }
+
+    // variant 4: double root (racine double), a given -> find b, c
+    const a = randNonZero(-4, 4);
+    const r = randInt(-8, 8);
+    const b = -2 * a * r;
+    const c = a * r * r;
+    const eqStr = `${termX2(a)} + bx + c = 0`;
+    const promptNote = `x = ${r} est l'unique solution (racine double). Déterminez b et c.`;
+    const steps = [
+      `Racine double : a(x ${signedAfter(-r)})² = 0, avec r = ${r}`,
+      `b = -2ar = -2 × ${a} × ${r} = ${b}`,
+      `c = a × r² = ${a} × ${r}² = ${c}`,
+    ];
+    return {
+      typeKey: 'coeffroots', typeLabel: 'Coefficients à partir des racines', color: '#5C7AAE',
+      segments: [{ type: 'text', value: eqStr }], promptNote,
+      steps, answerKind: 'tuple', answerLabels: ['b', 'c'],
+      answerFracs: [makeFrac(b, 1), makeFrac(c, 1)],
+    };
+  }
+
+  // ---------- Build a cubic from three given roots ----------
+  function genBuildCubic() {
+    let rt1, rt2, rt3;
+    do {
+      rt1 = randInt(-6, 6); rt2 = randInt(-6, 6); rt3 = randInt(-6, 6);
+    } while (rt1 === rt2 || rt1 === rt3 || rt2 === rt3);
+    const p = -(rt1 + rt2 + rt3);
+    const q = rt1 * rt2 + rt1 * rt3 + rt2 * rt3;
+    const s = -(rt1 * rt2 * rt3);
+    const eqStr = `x³ + px² + qx + r = 0`;
+    const promptNote = `Trouvez l'équation dont les solutions sont x = ${rt1}, x = ${rt2} et x = ${rt3}. Donnez p, q et r (dans cet ordre).`;
+    const steps = [
+      `p = -(x₁ + x₂ + x₃) = -(${rt1} + ${rt2} + ${rt3}) = ${p}`,
+      `q = x₁x₂ + x₁x₃ + x₂x₃ = ${q}`,
+      `r = -x₁x₂x₃ = -(${rt1} × ${rt2} × ${rt3}) = ${s}`,
+    ];
+    return {
+      typeKey: 'buildcubic', typeLabel: 'Construire une équation (3e degré)', color: '#6B4E9C',
+      segments: [{ type: 'text', value: eqStr }], promptNote,
+      steps, answerKind: 'tuple', answerLabels: ['p', 'q', 'r'],
+      answerFracs: [makeFrac(p, 1), makeFrac(q, 1), makeFrac(s, 1)],
+    };
+  }
+
+  // ---------- Higher-degree equations (same methods, higher power) ----------
+  function genPowerFactor() {
+    // xⁿ − k·xⁿ⁻¹ = 0, factor out the common power (same method as "facteur commun")
+    const n = randInt(3, 5);
+    const k = randNonZero(-9, 9);
+    const eqStr = `${xPow(n)} ${coefTerm(-k, xPow(n - 1))} = 0`;
+    const steps = [
+      eqStr,
+      `${xPow(n - 1)}(x ${signedAfter(-k)}) = 0`,
+      `x = 0 ou x = ${k}`,
+    ];
+    const answerFracs = [makeFrac(0, 1), makeFrac(k, 1)].sort((a, b) => fracToNum(a) - fracToNum(b));
+    return {
+      typeKey: 'powerfactor', typeLabel: 'Facteur commun (degré supérieur)', color: '#B0651F',
+      segments: [{ type: 'text', value: eqStr }],
+      steps, answerKind: 'values', answerFracs,
+    };
+  }
+
+  function genBiquadratic() {
+    // x⁴ + sx² + p = 0, solved by substitution u = x² (same method as "par substitution")
+    const m1 = randNonZero(1, 6);
+    const u1 = m1 * m1;
+    const hasSecond = Math.random() < 0.5;
+    let u2, m2 = null, j = null;
+    if (hasSecond) {
+      do { m2 = randNonZero(1, 6); } while (m2 === m1);
+      u2 = m2 * m2;
+    } else {
+      j = randNonZero(1, 6);
+      u2 = -(j * j);
+    }
+    const s = -(u1 + u2);
+    const p = u1 * u2;
+    const eqStr = `x⁴ ${signedAfter(s)}x² ${signedAfter(p)} = 0`;
+    const steps = [
+      eqStr,
+      `Poser u = x² : u² ${coefTerm(s, 'u')} ${signedAfter(p)} = 0`,
+      `(u ${signedAfter(-u1)})(u ${signedAfter(-u2)}) = 0 ⇒ u = ${u1} ou u = ${u2}`,
+    ];
+    let answerFracs;
+    if (hasSecond) {
+      steps.push(`x² = ${u1} ou x² = ${u2} ⇒ x = ±${m1} ou x = ±${m2}`);
+      answerFracs = [makeFrac(m1, 1), makeFrac(-m1, 1), makeFrac(m2, 1), makeFrac(-m2, 1)]
+        .sort((a, b) => fracToNum(a) - fracToNum(b));
+    } else {
+      steps.push(`x² = ${u1} ou x² = ${u2} (impossible, un carré ne peut pas être négatif) ⇒ x = ±${m1}`);
+      answerFracs = [makeFrac(m1, 1), makeFrac(-m1, 1)].sort((a, b) => fracToNum(a) - fracToNum(b));
+    }
+    return {
+      typeKey: 'biquadratic', typeLabel: 'Par substitution (degré 4)', color: '#7A3A5E',
+      segments: [{ type: 'text', value: eqStr }],
+      steps, answerKind: 'values', answerFracs,
+    };
+  }
+
+  function genCubicSolve() {
+    // x³ + px² + qx + pq = 0, solved by grouping (same method as "groupement")
+    const p = randNonZero(-9, 9);
+    const branchA = Math.random() < 0.5;
+    let q, j = null;
+    if (branchA) {
+      j = randNonZero(1, 6);
+      q = -(j * j);
+    } else {
+      q = randNonZero(1, 9);
+    }
+    const eqStr = `x³ ${signedAfter(p)}x² ${signedAfter(q)}x ${signedAfter(p * q)} = 0`;
+    const steps = [
+      eqStr,
+      `x²(x ${signedAfter(p)}) ${signedAfter(q)}(x ${signedAfter(p)}) = 0`,
+      `(x ${signedAfter(p)})(x² ${signedAfter(q)}) = 0`,
+    ];
+    let answerFracs;
+    if (branchA) {
+      steps.push(`x ${signedAfter(p)} = 0 ou x² ${signedAfter(q)} = 0 ⇒ x = ${-p} ou x = ±${j}`);
+      const seen = [];
+      answerFracs = [makeFrac(-p, 1), makeFrac(j, 1), makeFrac(-j, 1)]
+        .filter(f => {
+          const v = fracToNum(f);
+          if (seen.some(s => Math.abs(s - v) < 1e-9)) return false;
+          seen.push(v); return true;
+        })
+        .sort((a, b) => fracToNum(a) - fracToNum(b));
+    } else {
+      steps.push(`x ${signedAfter(p)} = 0 ou x² ${signedAfter(q)} = 0 (impossible, x² ${signedAfter(q)} ≥ ${q} > 0) ⇒ x = ${-p}`);
+      answerFracs = [makeFrac(-p, 1)];
+    }
+    return {
+      typeKey: 'cubicsolve', typeLabel: 'Groupement (degré 3)', color: '#3A5E7A',
+      segments: [{ type: 'text', value: eqStr }],
+      steps, answerKind: 'values', answerFracs,
+    };
+  }
+
+  // ---------- Powers and roots ----------
+  function genPowerRules() {
+    const bases = ['x', '2', '3', '5', '7'];
+    const base = bases[randInt(0, bases.length - 1)];
+    const variant = randInt(1, 4);
+
+    if (variant === 1) {
+      // product rule: aᵐ × aⁿ = aᵐ⁺ⁿ
+      const m = randInt(-6, 6);
+      const n = randInt(-6, 6);
+      const exprStr = `${expStr(base, m)} × ${expStr(base, n)}`;
+      const result = m + n;
+      const steps = [
+        exprStr,
+        `= ${base}^(${m} ${n >= 0 ? '+' : '−'} ${Math.abs(n)}) = ${expStr(base, result)}`,
+      ];
+      return {
+        typeKey: 'powerrules', typeLabel: 'Lois des puissances (produit)', color: '#7A5C2E',
+        segments: [{ type: 'text', value: exprStr }],
+        promptNote: `Écrivez le résultat sous la forme ${base}ⁿ et donnez l'exposant n.`,
+        steps, answerKind: 'value', answerFrac: makeFrac(result, 1),
+      };
+    }
+
+    if (variant === 2) {
+      // quotient rule (including the reciprocal 1/aⁿ case)
+      const asReciprocal = Math.random() < 0.35;
+      const m = asReciprocal ? 0 : randInt(-6, 6);
+      let n;
+      do { n = randInt(-6, 6); } while (n === m);
+      const exprStr = asReciprocal ? `1/${expStr(base, n)}` : `${expStr(base, m)} / ${expStr(base, n)}`;
+      const result = m - n;
+      const steps = [
+        exprStr,
+        `= ${base}^(${m} − (${n})) = ${expStr(base, result)}`,
+      ];
+      return {
+        typeKey: 'powerrules', typeLabel: 'Lois des puissances (quotient)', color: '#7A5C2E',
+        segments: [{ type: 'text', value: exprStr }],
+        promptNote: `Écrivez le résultat sous la forme ${base}ⁿ et donnez l'exposant n.`,
+        steps, answerKind: 'value', answerFrac: makeFrac(result, 1),
+      };
+    }
+
+    if (variant === 3) {
+      // power of a power: (aᵐ)ⁿ = aᵐⁿ
+      const m = randInt(-5, 5);
+      const n = randNonZero(-4, 4);
+      const exprStr = `(${expStr(base, m)})${toSup(n)}`;
+      const result = m * n;
+      const steps = [
+        exprStr,
+        `= ${base}^(${m} × ${n}) = ${expStr(base, result)}`,
+      ];
+      return {
+        typeKey: 'powerrules', typeLabel: 'Lois des puissances (puissance de puissance)', color: '#7A5C2E',
+        segments: [{ type: 'text', value: exprStr }],
+        promptNote: `Écrivez le résultat sous la forme ${base}ⁿ et donnez l'exposant n.`,
+        steps, answerKind: 'value', answerFrac: makeFrac(result, 1),
+      };
+    }
+
+    // variant 4: the addition trap — aᵐ + aᵐ ≠ a²ᵐ (QCM)
+    // Base 2 is excluded: 2·2ᵐ = 2ᵐ⁺¹ actually collapses to a single power there
+    // (since the doubling coefficient equals the base), which would make "2×2ᵐ"
+    // an incomplete answer with a second valid form ("2ᵐ⁺¹") missing from the choices.
+    const trapBases = ['x', '3', '5', '7'];
+    const trapBase = trapBases[randInt(0, trapBases.length - 1)];
+    const m = randInt(-5, 5);
+    const coefTimes = (coef, exp) => trapBase === 'x' ? `${coef}${expStr(trapBase, exp)}` : `${coef} × ${expStr(trapBase, exp)}`;
+    const exprStr = `${expStr(trapBase, m)} + ${expStr(trapBase, m)}`;
+    const correct = coefTimes(2, m);
+    const candidates = [
+      expStr(trapBase, 2 * m),
+      `${expStr(trapBase, m)}²`,
+      coefTimes(2, m + 1),
+      `${expStr(trapBase, m)} × ${expStr(trapBase, m)}`,
+      coefTimes(2, m - 1),
+      `${expStr(trapBase, m)}³`,
+    ];
+    const distractors = pickDistinct(correct, candidates, 4);
+    const choices = shuffle([correct, ...distractors]);
+    const steps = [
+      exprStr,
+      `Une addition n'est pas une multiplication : on ne peut pas additionner les exposants ici.`,
+      `${exprStr} = ${correct}`,
+    ];
+    return {
+      typeKey: 'powerrules', typeLabel: 'Lois des puissances (piège : addition)', color: '#7A5C2E',
+      mode: 'mc', segments: [{ type: 'text', value: exprStr }],
+      promptNote: 'Choisissez la simplification correcte.',
+      steps, correctAnswer: correct, choices,
+    };
+  }
+
+  function genSqrtCompute() {
+    const variant = randInt(1, 4);
+
+    if (variant === 1) {
+      const k = randInt(2, 30);
+      const eqStr = `√${k * k}`;
+      return {
+        typeKey: 'sqrtcompute', typeLabel: 'Calcul de racine carrée', color: '#2E5C7A',
+        segments: [{ type: 'text', value: eqStr }],
+        steps: [eqStr, `${k}² = ${k * k}`, `√${k * k} = ${k}`],
+        answerKind: 'value', answerFrac: makeFrac(k, 1),
+      };
+    }
+
+    if (variant === 2) {
+      const a = randInt(2, 20);
+      const b = randInt(2, 20);
+      const eqStr = `√(${a * a} · ${b * b})`;
+      return {
+        typeKey: 'sqrtcompute', typeLabel: 'Calcul de racine carrée', color: '#2E5C7A',
+        segments: [{ type: 'text', value: eqStr }],
+        steps: [eqStr, `= √${a * a} × √${b * b} = ${a} × ${b}`, `= ${a * b}`],
+        answerKind: 'value', answerFrac: makeFrac(a * b, 1),
+      };
+    }
+
+    if (variant === 3) {
+      const k = randInt(2, 20);
+      const eqStr = `√(1/${k * k})`;
+      return {
+        typeKey: 'sqrtcompute', typeLabel: 'Calcul de racine carrée', color: '#2E5C7A',
+        segments: [{ type: 'text', value: eqStr }],
+        steps: [eqStr, `= √1 / √${k * k} = 1/${k}`],
+        answerKind: 'value', answerFrac: makeFrac(1, k),
+      };
+    }
+
+    // variant 4: negative radicand -> no real solution
+    const neg = -randInt(1, 99);
+    const eqStr = `√${neg}`;
+    return {
+      typeKey: 'sqrtcompute', typeLabel: 'Calcul de racine carrée', color: '#2E5C7A',
+      segments: [{ type: 'text', value: eqStr }],
+      steps: [eqStr, 'Un carré ne peut pas être négatif', 'Aucune solution réelle'],
+      answerKind: 'none',
+    };
+  }
+
+  function genSimplifyRoot() {
+    const radicandPool = [2, 3, 5, 6, 7, 10, 11, 13, 14, 15];
+    const n = radicandPool[randInt(0, radicandPool.length - 1)];
+    const k = randInt(2, 12);
+    const radicand = k * k * n;
+    const exprStr = `√${radicand}`;
+    const correct = `${k}√${n}`;
+    const candidates = [
+      `${k * k}√${n}`,
+      `${k}√${n + 1}`,
+      `${k - 1 === 0 ? k + 2 : k - 1}√${n}`,
+      `√${radicand}`,
+    ];
+    const distractors = pickDistinct(correct, candidates, 4);
+    const choices = shuffle([correct, ...distractors]);
+    const steps = [
+      `√${radicand} = √(${k * k} × ${n})`,
+      `= √${k * k} × √${n}`,
+      `= ${correct}`,
+    ];
+    return {
+      typeKey: 'simplifyroot', typeLabel: 'Simplifier une racine', color: '#6B2E5C',
+      mode: 'mc', segments: [{ type: 'text', value: exprStr }],
+      promptNote: 'Choisissez la simplification correcte.',
+      steps, correctAnswer: correct, choices,
+    };
+  }
+
+  function genRationalizeSimple() {
+    const radicandPool = [2, 3, 5, 6, 7, 10, 11, 13, 14, 15, 17];
+    const n = radicandPool[randInt(0, radicandPool.length - 1)];
+    const k = randInt(1, 20);
+    const reduced = makeFrac(k, n);
+    function fmt(num, den, nn) {
+      const coefStr = num === 1 ? '' : num === -1 ? '-' : `${num}`;
+      const term = `${coefStr}√${nn}`;
+      return den === 1 ? term : `${term}/${den}`;
+    }
+    const correct = fmt(reduced.num, reduced.den, n);
+    const exprStr = `${k}/√${n}`;
+    const candidates = [
+      `${k}√${n}/${n}`,
+      `${k}/${n}`,
+      fmt(reduced.num, reduced.den, n + 1),
+      fmt(reduced.num + 1, reduced.den, n),
+      fmt(reduced.num, reduced.den + 1, n),
+    ];
+    const distractors = pickDistinct(correct, candidates, 4);
+    const choices = shuffle([correct, ...distractors]);
+    const steps = [
+      exprStr,
+      `= ${k}/√${n} × √${n}/√${n} = ${k}√${n}/${n}`,
+      `= ${correct}`,
+    ];
+    return {
+      typeKey: 'rationalizesimple', typeLabel: 'Rationaliser (terme simple)', color: '#5C7A2E',
+      mode: 'mc', segments: [{ type: 'text', value: exprStr }],
+      promptNote: 'Choisissez la forme rationalisée correcte.',
+      steps, correctAnswer: correct, choices,
+    };
+  }
+
+  function genRationalizeConjugate() {
+    const radicandPool = [2, 3, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 17, 18, 19, 20];
+    let a, b;
+    do {
+      a = radicandPool[randInt(0, radicandPool.length - 1)];
+      b = radicandPool[randInt(0, radicandPool.length - 1)];
+    } while (a <= b);
+    const origSign = Math.random() < 0.5 ? '+' : '−';
+    const conjSign = origSign === '+' ? '−' : '+';
+    const k = randInt(1, 6);
+    const denomAfter = a - b;
+    const g = gcd(k, denomAfter) || 1;
+    const redNum = k / g;
+    const redDen = denomAfter / g;
+    const coefStr = redNum === 1 ? '' : `${redNum}`;
+    const numeratorExpr = `${coefStr}√${a} ${conjSign} ${coefStr}√${b}`;
+    const correct = redDen === 1 ? numeratorExpr : `(${numeratorExpr})/${redDen}`;
+    const exprStr = `${k}/(√${a} ${origSign} √${b})`;
+
+    const wrongSignNumerator = `${coefStr}√${a} ${origSign} ${coefStr}√${b}`;
+    const candidate1 = redDen === 1 ? wrongSignNumerator : `(${wrongSignNumerator})/${redDen}`;
+    const candidate2 = redDen === 1 ? `${k}` : `${k}/${denomAfter}`;
+    const candidate3 = `(${k}√${a} ${conjSign} ${k}√${b})/${denomAfter + 1}`;
+    const altCoefStr = (redNum + 1) === 1 ? '' : `${redNum + 1}`;
+    const candidate4 = redDen === 1
+      ? `${altCoefStr}√${a} ${conjSign} ${altCoefStr}√${b}`
+      : `(${altCoefStr}√${a} ${conjSign} ${altCoefStr}√${b})/${redDen}`;
+
+    const candidates = [candidate1, candidate2, candidate3, candidate4];
+    const distractors = pickDistinct(correct, candidates, 4);
+    const choices = shuffle([correct, ...distractors]);
+    const steps = [
+      exprStr,
+      `Multiplier par le conjugué : (√${a} ${conjSign} √${b})/(√${a} ${conjSign} √${b})`,
+      `Dénominateur : (√${a})² − (√${b})² = ${a} − ${b} = ${denomAfter}`,
+      `Numérateur : ${k}(√${a} ${conjSign} √${b}) = ${k}√${a} ${conjSign} ${k}√${b}`,
+      `= ${correct}`,
+    ];
+    return {
+      typeKey: 'rationalizeconjugate', typeLabel: 'Rationaliser (conjugué)', color: '#7A2E4A',
+      mode: 'mc', segments: [{ type: 'text', value: exprStr }],
+      promptNote: 'Multipliez par le conjugué, puis choisissez la forme correcte.',
+      steps, correctAnswer: correct, choices,
+    };
+  }
+
+  // ---------- Factoring quizzes (multiple choice) ----------
+  function genSqIdentity() {
+    const m = randNonZero(1, 5);
+    const n = randNonZero(1, 9);
+    const s = Math.random() < 0.5 ? 1 : -1;
+    const b2 = 2 * m * n;
+    const exprStr = `${termVarPow(m * m, 'x²')} ${signedAfter(s * b2)}x ${signedAfter(n * n)}`;
+    const correct = `(${termX(m)} ${signedAfter(s * n)})²`;
+    const candidates = [
+      `(${termX(m)} ${signedAfter(-s * n)})²`,
+      `(${termX(m)} ${signedAfter(s * n)})(${termX(m)} ${signedAfter(-s * n)})`,
+      `(${termX(m)} ${signedAfter(s * (n + 1))})²`,
+      `(${termX(m + 1)} ${signedAfter(s * n)})²`,
+      `(${termX(m)} ${signedAfter(s * (n - 1))})²`,
+      `(${termX(m)} ${signedAfter(s * n)})(${termX(-m)} ${signedAfter(s * n)})`,
+    ];
+    const distractors = pickDistinct(correct, candidates, 4);
+    const choices = shuffle([correct, ...distractors]);
+    const steps = [
+      `Repérer les carrés : (${termX(m)})² = ${m * m}x², et ${n}² = ${n * n}.`,
+      `Le double produit : 2 × ${m}x × ${n} = ${b2}x, avec le signe ${s > 0 ? '+' : '−'}.`,
+      `${exprStr} = ${correct}`,
+    ];
+    return {
+      typeKey: 'sqidentity', typeLabel: 'Carré parfait (factoriser)', color: '#B8860B',
+      mode: 'mc', segments: [{ type: 'text', value: exprStr }],
+      promptNote: 'Choisissez la factorisation correcte.',
+      steps, correctAnswer: correct, choices,
+    };
+  }
+
+  function genDiffSquares() {
+    const m = randNonZero(1, 6);
+    const n = randNonZero(1, 9);
+    const exprStr = `${termVarPow(m * m, 'x²')} − ${n * n}`;
+    const correct = `(${termX(m)} − ${n})(${termX(m)} + ${n})`;
+    const candidates = [
+      `(${termX(m)} − ${n})(${termX(m)} − ${n})`,
+      `(${termX(m)} + ${n})(${termX(m)} + ${n})`,
+      `(${termX(m)} − ${n + 1})(${termX(m)} + ${n + 1})`,
+      `(${termX(m)} − ${n})(${termX(m + 1)} + ${n})`,
+      `(${termX(m)} − ${Math.max(1, n - 1)})(${termX(m)} + ${Math.max(1, n - 1)})`,
+      `(${termX(m)} + ${n})(${termX(m)} − ${n + 2})`,
+    ];
+    const distractors = pickDistinct(correct, candidates, 4);
+    const choices = shuffle([correct, ...distractors]);
+    const steps = [
+      `Repérer deux carrés : (${termX(m)})² = ${m * m}x² et ${n}² = ${n * n}.`,
+      `Différence de carrés : a² − b² = (a − b)(a + b).`,
+      `${exprStr} = ${correct}`,
+    ];
+    return {
+      typeKey: 'diffsquares', typeLabel: 'Différence de carrés (factoriser)', color: '#D1487A',
+      mode: 'mc', segments: [{ type: 'text', value: exprStr }],
+      promptNote: 'Choisissez la factorisation correcte.',
+      steps, correctAnswer: correct, choices,
+    };
+  }
+
+  function genIdentity4MC() {
+    const a = randInt(-9, 9);
+    const b = randInt(-9, 9);
+    const s = a + b;
+    const p = a * b;
+    const exprStr = `x² ${signedAfter(s)}x ${signedAfter(p)}`;
+    const correct = `(x ${signedAfter(a)})(x ${signedAfter(b)})`;
+    const sameSet = (x, y) => (x === a && y === b) || (x === b && y === a);
+    const pairs = [
+      [-a, b], [a, -b], [s, p], [a + 1, b - 1], [a - 1, b + 1], [-a, -b],
+      [a + 2, b - 2], [a - 2, b + 2], [a + 3, b - 3], [a - 3, b + 3],
+      [a + 4, b - 4], [a - 4, b + 4], [a + 5, b - 5], [a - 5, b + 5],
+    ].filter(([x, y]) => !sameSet(x, y));
+    const candidates = pairs.map(([x, y]) => `(x ${signedAfter(x)})(x ${signedAfter(y)})`);
+    const distractors = pickDistinct(correct, candidates, 4);
+    const choices = shuffle([correct, ...distractors]);
+    const steps = [
+      `Chercher deux nombres a et b tels que a + b = ${s} et a × b = ${p}.`,
+      `Les nombres ${a} et ${b} conviennent : ${a} + ${b} = ${s}, ${a} × ${b} = ${p}.`,
+      `${exprStr} = ${correct}`,
+    ];
+    return {
+      typeKey: 'identity4mc', typeLabel: 'Trinôme (factoriser)', color: '#4E7A3E',
+      mode: 'mc', segments: [{ type: 'text', value: exprStr }],
+      promptNote: 'Choisissez la factorisation correcte.',
+      steps, correctAnswer: correct, choices,
+    };
+  }
+
+  function genCommonFactorMC() {
+    if (Math.random() < 0.5) {
+      // k·x^p (mx + n)
+      const p = randInt(1, 2);
+      const k = randInt(2, 9);
+      const m = randNonZero(-6, 6);
+      const n = randNonZero(-9, 9);
+      const A = k * m;
+      const B = k * n;
+      const exprStr = `${termVarPow(A, xPow(p + 1))} ${coefTerm(B, xPow(p))}`;
+      const correct = `${termVarPow(k, xPow(p))}(${termX(m)} ${signedAfter(n)})`;
+      const candidates = [
+        `${k}(${termX(m)} ${signedAfter(n)})`,
+        `${termVarPow(k, xPow(p))}(${termX(m)} ${signedAfter(-n)})`,
+        `${termVarPow(k, xPow(p + 1))}(${termX(m)} ${signedAfter(n)})`,
+        `${termVarPow(k - 1 === 0 ? k + 1 : k - 1, xPow(p))}(${termX(m)} ${signedAfter(n)})`,
+        `${termVarPow(k, xPow(p))}(${termX(m + 1 === 0 ? m + 2 : m + 1)} ${signedAfter(n)})`,
+        `${termVarPow(k, xPow(p))}(${termX(n)} ${signedAfter(m)})`,
+      ];
+      const distractors = pickDistinct(correct, candidates, 4);
+      const choices = shuffle([correct, ...distractors]);
+      const steps = [
+        `Le facteur commun est ${termVarPow(k, xPow(p))}.`,
+        `${exprStr} = ${correct}`,
+      ];
+      return {
+        typeKey: 'commonfactormc', typeLabel: 'Factoriser (facteur commun)', color: '#8B5E34',
+        mode: 'mc', segments: [{ type: 'text', value: exprStr }],
+        promptNote: 'Choisissez la factorisation correcte.',
+        steps, correctAnswer: correct, choices,
+      };
+    }
+
+    // A(px+q) ± B(px+q)
+    const pCoef = randNonZero(-6, 6);
+    const q = randInt(-9, 9);
+    const A = randNonZero(-6, 6);
+    const B = randInt(2, 9);
+    const op = Math.random() < 0.5 ? '+' : '−';
+    const combinedConst = op === '+' ? B : -B;
+    const exprStr = `${termX(A)}(${termX(pCoef)} ${signedAfter(q)}) ${op} ${B}(${termX(pCoef)} ${signedAfter(q)})`;
+    const correct = `(${termX(pCoef)} ${signedAfter(q)})(${termX(A)} ${signedAfter(combinedConst)})`;
+    const nudge = combinedConst >= 0 ? combinedConst + 1 : combinedConst - 1;
+    const candidates = [
+      `(${termX(pCoef)} ${signedAfter(q)})(${termX(A)} ${signedAfter(-combinedConst)})`,
+      `(${termX(pCoef)} ${signedAfter(-q)})(${termX(A)} ${signedAfter(combinedConst)})`,
+      `(${termX(pCoef)} ${signedAfter(q)})(${termX(A)} ${signedAfter(nudge)})`,
+      `(${termX(pCoef)} ${signedAfter(q)})(${termX(A + 1 === 0 ? A + 2 : A + 1)} ${signedAfter(combinedConst)})`,
+      `(${termX(pCoef)} ${signedAfter(-q)})(${termX(A)} ${signedAfter(-combinedConst)})`,
+      `(${termX(pCoef)} ${signedAfter(q + 1)})(${termX(A)} ${signedAfter(combinedConst)})`,
+    ];
+    const distractors = pickDistinct(correct, candidates, 4);
+    const choices = shuffle([correct, ...distractors]);
+    const steps = [
+      `Le facteur commun est (${termX(pCoef)} ${signedAfter(q)}).`,
+      `${exprStr} = ${correct}`,
+    ];
+    return {
+      typeKey: 'commonfactormc', typeLabel: 'Factoriser (facteur commun)', color: '#8B5E34',
+      mode: 'mc', segments: [{ type: 'text', value: exprStr }],
+      promptNote: 'Choisissez la factorisation correcte.',
+      steps, correctAnswer: correct, choices,
+    };
+  }
+
+  function genGrouping() {
+    const p = randNonZero(-9, 9);
+    const q = randNonZero(-9, 9);
+    const exprStr = `x³ ${signedAfter(p)}x² ${signedAfter(q)}x ${signedAfter(p * q)}`;
+    const correct = `(x ${signedAfter(p)})(x² ${signedAfter(q)})`;
+    const candidates = [
+      `(x ${signedAfter(q)})(x² ${signedAfter(p)})`,
+      `(x ${signedAfter(-p)})(x² ${signedAfter(q)})`,
+      `(x ${signedAfter(p)})(x² ${signedAfter(-q)})`,
+      `(x ${signedAfter(p)})(x² ${signedAfter(q + 1)})`,
+      `(x ${signedAfter(p + 1)})(x² ${signedAfter(q)})`,
+      `(x ${signedAfter(-p)})(x² ${signedAfter(-q)})`,
+    ];
+    const distractors = pickDistinct(correct, candidates, 4);
+    const choices = shuffle([correct, ...distractors]);
+    const steps = [
+      `Grouper deux par deux : x²(x ${signedAfter(p)}) ${signedAfter(q)}(x ${signedAfter(p)})`,
+      `${exprStr} = ${correct}`,
+    ];
+    return {
+      typeKey: 'grouping', typeLabel: 'Groupement de termes', color: '#2E6B8E',
+      mode: 'mc', segments: [{ type: 'text', value: exprStr }],
+      promptNote: 'Choisissez la factorisation correcte.',
+      steps, correctAnswer: correct, choices,
+    };
+  }
+
+  const GENERATORS = {
+    simple: genSimple,
+    parentheses: genParentheses,
+    bothsides: genBothSides,
+    fractions: genFractions,
+    sqrt: genSqrt,
+    quadratic: genQuadratic,
+    zeroproduct: genZeroProduct,
+    commonfactor: genCommonFactor,
+    generalquad: genGeneralQuad,
+    substitution: genSubstitution,
+    findparam: genFindParam,
+    coeffroots: genCoeffRoots,
+    buildcubic: genBuildCubic,
+    powerfactor: genPowerFactor,
+    biquadratic: genBiquadratic,
+    cubicsolve: genCubicSolve,
+    sqidentity: genSqIdentity,
+    diffsquares: genDiffSquares,
+    identity4mc: genIdentity4MC,
+    commonfactormc: genCommonFactorMC,
+    grouping: genGrouping,
+    powerrules: genPowerRules,
+    sqrtcompute: genSqrtCompute,
+    simplifyroot: genSimplifyRoot,
+    rationalizesimple: genRationalizeSimple,
+    rationalizeconjugate: genRationalizeConjugate,
+  };
+
+  const TYPE_META = [
+    { key: 'simple', label: 'Équations simples', group: 'degree1' },
+    { key: 'parentheses', label: 'Parenthèses', group: 'degree1' },
+    { key: 'bothsides', label: 'Variable des 2 côtés', group: 'degree1' },
+    { key: 'fractions', label: 'Fractions', group: 'degree1' },
+    { key: 'sqrt', label: 'Racines carrées', group: 'degree1' },
+    { key: 'quadratic', label: '2nd degré', group: 'degree2' },
+    { key: 'zeroproduct', label: 'Produit nul', group: 'degree2' },
+    { key: 'commonfactor', label: 'Facteur commun', group: 'degree2' },
+    { key: 'generalquad', label: 'Forme générale', group: 'degree2' },
+    { key: 'substitution', label: 'Par substitution', group: 'degree2' },
+    { key: 'findparam', label: 'Trouver un paramètre', group: 'degree2' },
+    { key: 'coeffroots', label: 'Coefficients ↔ racines', group: 'degree2' },
+    { key: 'buildcubic', label: 'Construire (3e degré)', group: 'degree2' },
+    { key: 'powerfactor', label: 'Facteur commun (degré sup.)', group: 'higher' },
+    { key: 'biquadratic', label: 'Substitution (degré 4)', group: 'higher' },
+    { key: 'cubicsolve', label: 'Groupement (degré 3)', group: 'higher' },
+    { key: 'sqidentity', label: 'Carré parfait (QCM)', group: 'factoring' },
+    { key: 'diffsquares', label: 'Différence de carrés (QCM)', group: 'factoring' },
+    { key: 'identity4mc', label: 'Trinôme (QCM)', group: 'factoring' },
+    { key: 'commonfactormc', label: 'Facteur commun (QCM)', group: 'factoring' },
+    { key: 'grouping', label: 'Groupement (QCM)', group: 'factoring' },
+    { key: 'powerrules', label: 'Lois des puissances', group: 'powersroots' },
+    { key: 'sqrtcompute', label: 'Calcul de racines', group: 'powersroots' },
+    { key: 'simplifyroot', label: 'Simplifier une racine', group: 'powersroots' },
+    { key: 'rationalizesimple', label: 'Rationaliser (simple)', group: 'powersroots' },
+    { key: 'rationalizeconjugate', label: 'Rationaliser (conjugué)', group: 'powersroots' },
+  ];
+
+  const GROUP_META = [
+    { key: 'degree1', label: 'Équations premier degré' },
+    { key: 'degree2', label: 'Équations second degré' },
+    { key: 'higher', label: 'Degré supérieur' },
+    { key: 'factoring', label: 'Factorisation' },
+    { key: 'powersroots', label: 'Puissances et racines' },
+  ];
+
+  // ---------- Parser ----------
+  function parseAnswer(raw) {
+    const s = raw.trim().toLowerCase().replace(',', '.');
+    if (!s) return null;
+    if (/(aucune|pas de)\s*solution/.test(s)) return { kind: 'none' };
+    if (/(tous|tout).*(r[ée]el)|infinit/.test(s)) return { kind: 'all' };
+
+    const parts = s.split(/et|ou|;|,/).map(p => p.trim()).filter(p => p.length > 0);
+
+    if (parts.length > 1) {
+      const fracs = [];
+      for (const part of parts) {
+        const fracMatch = part.match(/^(-?\d+)\s*\/\s*(-?\d+)$/);
+        if (fracMatch) {
+          const num = parseInt(fracMatch[1], 10);
+          const den = parseInt(fracMatch[2], 10);
+          if (den !== 0) fracs.push(makeFrac(num, den));
+          else return null;
+        } else {
+          const numMatch = part.match(/^-?\d+(\.\d+)?$/);
+          if (numMatch) {
+            const val = parseFloat(part);
+            fracs.push(makeFrac(Math.round(val * 100), 100));
+          } else {
+            return null;
+          }
+        }
+      }
+      return { kind: 'values', fracs: fracs };
+    }
+
+    const fracMatch = s.match(/^(-?\d+)\s*\/\s*(-?\d+)$/);
+    if (fracMatch) {
+      const num = parseInt(fracMatch[1], 10);
+      const den = parseInt(fracMatch[2], 10);
+      if (den === 0) return null;
+      return { kind: 'value', frac: makeFrac(num, den), exact: true };
+    }
+    const numMatch = s.match(/^-?\d+(\.\d+)?$/);
+    if (numMatch) return { kind: 'value', value: parseFloat(s), exact: false };
+    return null;
+  }
+
+  // ---------- Checker ----------
+  function checkAnswer(parsed, eq) {
+    if (!parsed) return false;
+
+    // Double-root case: a single typed value should match a length-1 answerFracs list,
+    // even though it parses as kind 'value' rather than 'values'.
+    if (eq.answerKind === 'values' && eq.answerFracs.length === 1 && parsed.kind === 'value') {
+      if (parsed.exact) return fracEq(parsed.frac, eq.answerFracs[0]);
+      return Math.abs(parsed.value - fracToNum(eq.answerFracs[0])) < 0.01;
+    }
+
+    // Ordered-tuple answers (e.g. "b et c"): position matters, unlike root lists.
+    if (eq.answerKind === 'tuple') {
+      if (parsed.kind !== 'values' || parsed.fracs.length !== eq.answerFracs.length) return false;
+      return parsed.fracs.every((f, i) => Math.abs(fracToNum(f) - fracToNum(eq.answerFracs[i])) < 0.01);
+    }
+
+    if (parsed.kind !== eq.answerKind) return false;
+    if (eq.answerKind === 'none' || eq.answerKind === 'all') return true;
+
+    if (eq.answerKind === 'values') {
+      if (eq.answerFracs.length === 1) {
+        if (parsed.fracs.length === 1) return fracEq(parsed.fracs[0], eq.answerFracs[0]);
+        return false;
+      }
+
+      if (parsed.fracs.length !== eq.answerFracs.length) return false;
+      const userSorted = parsed.fracs.map(f => f.num / f.den).sort((a, b) => a - b);
+      const correctSorted = eq.answerFracs.map(f => f.num / f.den).sort((a, b) => a - b);
+      return userSorted.every((v, i) => Math.abs(v - correctSorted[i]) < 0.01);
+    }
+
+    if (eq.answerKind === 'value') {
+      if (parsed.exact) return fracEq(parsed.frac, eq.answerFrac);
+      return Math.abs(parsed.value - fracToNum(eq.answerFrac)) < 0.01;
+    }
+    return false;
+  }
+
+  // ---------- State ----------
+  const NUM_SLOTS = 3;
+  let enabled = Object.fromEntries(GROUP_META.map(g => [g.key, true]));
+  let slots = []; // { eq, feedback, selectedChoice, revealed, inputValue }
+  let score = { correct: 0, total: 0 };
+  let streak = 0;
+
+  // ---------- DOM refs ----------
+  const chipsEl = document.getElementById('chips');
+  const cardsContainerEl = document.getElementById('cardsContainer');
+  const scoreValEl = document.getElementById('scoreVal');
+  const streakValEl = document.getElementById('streakVal');
+
+  function activeKeys() {
+    return TYPE_META.filter(t => enabled[t.group]).map(t => t.key);
+  }
+
+  function renderChips() {
+    chipsEl.innerHTML = '';
+    GROUP_META.forEach(g => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'chip' + (enabled[g.key] ? ' active' : '');
+      btn.textContent = g.label;
+      btn.addEventListener('click', () => toggleType(g.key));
+      chipsEl.appendChild(btn);
+    });
+  }
+
+  function toggleType(key) {
+    const activeCount = Object.values(enabled).filter(Boolean).length;
+    if (enabled[key] && activeCount === 1) return;
+    enabled[key] = !enabled[key];
+    renderChips();
+  }
+
+  function renderSegmentsInto(container, segments) {
+    container.innerHTML = '';
+    segments.forEach(seg => {
+      if (seg.type === 'text') {
+        const span = document.createElement('span');
+        span.className = 'eq-text';
+        span.textContent = seg.value;
+        container.appendChild(span);
+      } else if (seg.type === 'frac') {
+        const wrap = document.createElement('span');
+        wrap.className = 'eq-frac';
+        const num = document.createElement('span');
+        num.className = 'eq-frac-num';
+        num.textContent = seg.num;
+        const den = document.createElement('span');
+        den.className = 'eq-frac-den';
+        den.textContent = seg.den;
+        wrap.appendChild(num);
+        wrap.appendChild(den);
+        container.appendChild(wrap);
+      } else if (seg.type === 'sqrt') {
+        const wrap = document.createElement('span');
+        wrap.className = 'eq-sqrt';
+        const sign = document.createElement('span');
+        sign.className = 'eq-sqrt-sign';
+        sign.textContent = '√';
+        const content = document.createElement('span');
+        content.className = 'eq-sqrt-content';
+        content.textContent = seg.content;
+        wrap.appendChild(sign);
+        wrap.appendChild(content);
+        container.appendChild(wrap);
+      }
+    });
+  }
+
+  function formatAnswer(eq) {
+    if (eq.mode === 'mc') return eq.correctAnswer;
+    if (eq.answerKind === 'tuple') {
+      return eq.answerFracs.map((f, i) => eq.answerLabels ? `${eq.answerLabels[i]} = ${fracToStr(f)}` : fracToStr(f)).join(' , ');
+    }
+    if (eq.answerKind === 'values') return eq.answerFracs.map(f => fracToStr(f)).join(' ou ');
+    if (eq.answerKind === 'value') return fracToStr(eq.answerFrac);
+    if (eq.answerKind === 'none') return 'aucune solution';
+    return 'tous les réels';
+  }
+
+  function groupLabelOf(groupKey) {
+    const g = GROUP_META.find(g => g.key === groupKey);
+    return g ? g.label : '';
+  }
+
+  // Picks a group for a slot, avoiding the themes already used by `otherGroups` when
+  // possible, and keeping `preferredGroup` (e.g. on a single-card regenerate) if it's
+  // still active and doesn't collide with the other slots.
+  function chooseGroupForSlot(otherGroups, preferredGroup) {
+    const active = GROUP_META.map(g => g.key).filter(k => enabled[k]);
+    const pool = active.length ? active : GROUP_META.map(g => g.key);
+    if (preferredGroup && pool.includes(preferredGroup) && !otherGroups.includes(preferredGroup)) {
+      return preferredGroup;
+    }
+    const avoiding = pool.filter(g => !otherGroups.includes(g));
+    const choices = avoiding.length ? avoiding : pool;
+    return choices[randInt(0, choices.length - 1)];
+  }
+
+  function pickEqForGroup(groupKey) {
+    const keysInGroup = TYPE_META.filter(t => t.group === groupKey).map(t => t.key);
+    const pool = keysInGroup.length ? keysInGroup : activeKeys();
+    const key = pool[randInt(0, pool.length - 1)];
+    return GENERATORS[key]();
+  }
+
+  function newSlot(otherGroups) {
+    const groupKey = chooseGroupForSlot(otherGroups || []);
+    return { groupKey, eq: pickEqForGroup(groupKey), feedback: null, selectedChoice: null, revealed: 0, inputValue: '' };
+  }
+
+  function buildCard(i) {
+    const slot = slots[i];
+    const eq = slot.eq;
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.setProperty('--type-color', eq.color);
+
+    const typeLabelEl = document.createElement('p');
+    typeLabelEl.className = 'type-label';
+    typeLabelEl.textContent = `${groupLabelOf(slot.groupKey)} · ${eq.typeLabel}`;
+    card.appendChild(typeLabelEl);
+
+    const eqDisplayEl = document.createElement('span');
+    eqDisplayEl.className = 'eq-display';
+    renderSegmentsInto(eqDisplayEl, eq.segments);
+    card.appendChild(eqDisplayEl);
+
+    if (eq.excludedFrac) {
+      const hint = document.createElement('p');
+      hint.className = 'hint';
+      hint.textContent = `Valeur interdite : x ≠ ${fracToStr(eq.excludedFrac)}`;
+      card.appendChild(hint);
+    }
+    if (eq.promptNote) {
+      const note = document.createElement('p');
+      note.className = 'hint';
+      note.textContent = eq.promptNote;
+      card.appendChild(note);
+    }
+
+    if (eq.mode === 'mc') {
+      const choicesDiv = document.createElement('div');
+      choicesDiv.className = 'choices';
+      eq.choices.forEach(choiceStr => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'choice-btn';
+        btn.textContent = choiceStr;
+        if (slot.feedback) {
+          btn.disabled = true;
+          if (choiceStr === eq.correctAnswer) btn.classList.add('correct');
+          else if (choiceStr === slot.selectedChoice) btn.classList.add('incorrect');
+        }
+        btn.addEventListener('click', () => handleChoice(i, choiceStr));
+        choicesDiv.appendChild(btn);
+      });
+      card.appendChild(choicesDiv);
+    } else {
+      const inputRow = document.createElement('div');
+      inputRow.className = 'input-row';
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.placeholder = 'Réponse (ex : 3/4, 3 et -3, aucune solution...)';
+      input.autocomplete = 'off';
+      input.value = slot.inputValue;
+      input.addEventListener('input', e => { slot.inputValue = e.target.value; });
+      input.addEventListener('keydown', e => { if (e.key === 'Enter') handleCheck(i); });
+      const checkBtn = document.createElement('button');
+      checkBtn.type = 'button';
+      checkBtn.className = 'btn-primary';
+      checkBtn.textContent = 'Vérifier';
+      checkBtn.addEventListener('click', () => handleCheck(i));
+      inputRow.appendChild(input);
+      inputRow.appendChild(checkBtn);
+      card.appendChild(inputRow);
+    }
+
+    if (slot.feedback) {
+      const fb = document.createElement('p');
+      fb.className = 'feedback ' + slot.feedback;
+      fb.textContent = slot.feedback === 'correct'
+        ? 'Correct.'
+        : `Ce n'est pas ça. La bonne réponse : ${formatAnswer(eq)}`;
+      card.appendChild(fb);
+    }
+
+    const actionsRow = document.createElement('div');
+    actionsRow.className = 'actions-row';
+    const leftBtns = document.createElement('div');
+    leftBtns.style.display = 'flex';
+    leftBtns.style.gap = '8px';
+    leftBtns.style.flexWrap = 'wrap';
+    const revealBtn = document.createElement('button');
+    revealBtn.type = 'button';
+    revealBtn.className = 'btn-ghost';
+    revealBtn.textContent = 'Étape suivante';
+    revealBtn.disabled = slot.revealed >= eq.steps.length;
+    revealBtn.addEventListener('click', () => handleReveal(i));
+    leftBtns.appendChild(revealBtn);
+    if (slot.revealed < eq.steps.length) {
+      const revealAllBtn = document.createElement('button');
+      revealAllBtn.type = 'button';
+      revealAllBtn.className = 'btn-ghost';
+      revealAllBtn.textContent = 'Tout révéler';
+      revealAllBtn.addEventListener('click', () => handleRevealAll(i));
+      leftBtns.appendChild(revealAllBtn);
+    }
+    actionsRow.appendChild(leftBtns);
+    const nextBtn = document.createElement('button');
+    nextBtn.type = 'button';
+    nextBtn.className = 'btn-ghost';
+    nextBtn.textContent = 'Nouvel exercice';
+    nextBtn.addEventListener('click', () => handleNext(i));
+    actionsRow.appendChild(nextBtn);
+    card.appendChild(actionsRow);
+
+    if (slot.revealed > 0) {
+      const stepsDiv = document.createElement('div');
+      stepsDiv.className = 'steps';
+      eq.steps.slice(0, slot.revealed).forEach(s => {
+        const line = document.createElement('div');
+        line.className = 'step-line';
+        line.textContent = s;
+        stepsDiv.appendChild(line);
+      });
+      card.appendChild(stepsDiv);
+    }
+
+    return card;
+  }
+
+  function renderCards() {
+    cardsContainerEl.innerHTML = '';
+    slots.forEach((slot, i) => cardsContainerEl.appendChild(buildCard(i)));
+  }
+
+  function updateScoreDisplay() {
+    scoreValEl.textContent = `${score.correct}/${score.total}`;
+    streakValEl.textContent = `${streak}`;
+  }
+
+  function handleCheck(i) {
+    const slot = slots[i];
+    const parsed = parseAnswer(slot.inputValue);
+    const ok = checkAnswer(parsed, slot.eq);
+    slot.feedback = ok ? 'correct' : 'incorrect';
+    score = { correct: score.correct + (ok ? 1 : 0), total: score.total + 1 };
+    streak = ok ? streak + 1 : 0;
+    renderCards();
+    updateScoreDisplay();
+  }
+
+  function handleChoice(i, choiceStr) {
+    const slot = slots[i];
+    if (slot.feedback) return;
+    slot.selectedChoice = choiceStr;
+    const ok = choiceStr === slot.eq.correctAnswer;
+    slot.feedback = ok ? 'correct' : 'incorrect';
+    score = { correct: score.correct + (ok ? 1 : 0), total: score.total + 1 };
+    streak = ok ? streak + 1 : 0;
+    renderCards();
+    updateScoreDisplay();
+  }
+
+  function handleReveal(i) {
+    const slot = slots[i];
+    slot.revealed = Math.min(slot.revealed + 1, slot.eq.steps.length);
+    renderCards();
+  }
+
+  function handleRevealAll(i) {
+    const slot = slots[i];
+    slot.revealed = slot.eq.steps.length;
+    renderCards();
+  }
+
+  function handleNext(i) {
+    const others = slots.filter((_, idx) => idx !== i).map(s => s.groupKey);
+    const groupKey = chooseGroupForSlot(others, slots[i].groupKey);
+    slots[i] = { groupKey, eq: pickEqForGroup(groupKey), feedback: null, selectedChoice: null, revealed: 0, inputValue: '' };
+    renderCards();
+  }
+
+  function initSlots() {
+    slots = [];
+    for (let i = 0; i < NUM_SLOTS; i++) {
+      slots.push(newSlot(slots.map(s => s.groupKey)));
+    }
+  }
+
+  renderChips();
+  initSlots();
+  renderCards();
+  updateScoreDisplay();
+})();
+</script>
+</body>
+</html>

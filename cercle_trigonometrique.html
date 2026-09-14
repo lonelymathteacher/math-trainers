@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cercle trigonométrique</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Space+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --paper: #EFF3F6;
+    --ink: #1B2A4A;
+    --ink-soft: #4A5670;
+    --card: #FFFFFF;
+    --border: #D8DEE6;
+    --accent: #2F6F72;
+    --good: #2F7D4F;
+    --bad: #B23A2E;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100%;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .wrap { padding: 28px 20px 48px; display: flex; justify-content: center; }
+  .col { width: 100%; max-width: 680px; }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 28px;
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+  .subtitle { color: var(--ink-soft); font-size: 14px; margin: 0 0 18px; max-width: 46ch; }
+
+  .session-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin-bottom: 14px;
+    font-size: 13.5px;
+  }
+  .session-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .session-left b { font-family: 'JetBrains Mono', monospace; color: var(--ink); }
+  .session-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .timer-toggle { display: flex; align-items: center; gap: 6px; color: var(--ink-soft); cursor: pointer; user-select: none; }
+  .timer-display {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    background: var(--paper);
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+  .session-right .btn-ghost { padding: 6px 12px; font-size: 13px; }
+
+  .grade-banner {
+    background: var(--card);
+    border: 1px solid var(--accent);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+  }
+  .grade-title { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 600; margin: 0 0 6px; color: var(--ink); }
+  .grade-detail { font-size: 13.5px; color: var(--ink-soft); margin: 0; }
+
+  .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+  .tab {
+    font-size: 13px;
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--ink-soft);
+    cursor: pointer;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+  }
+  .tab.active { border-color: var(--accent); color: var(--accent); background: rgba(47,111,114,0.08); }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 24px 26px;
+  }
+
+  .scorebox { display: flex; gap: 18px; font-size: 13px; color: var(--ink-soft); margin-bottom: 14px; }
+  .scorebox b { color: var(--ink); font-family: 'JetBrains Mono', monospace; }
+
+  .prompt-text { font-size: 19px; font-weight: 600; margin: 0 0 14px; font-family: 'JetBrains Mono', monospace; }
+  .sess-type-tag { font-size: 13px; color: var(--accent); margin: 0 0 10px; font-weight: 500; }
+  .feedback { font-size: 14px; font-weight: 500; margin: 12px 0 0; min-height: 20px; }
+  .feedback.correct { color: var(--good); }
+  .feedback.incorrect { color: var(--bad); }
+
+  .circle-wrap { display: flex; justify-content: center; margin: 8px 0; }
+  svg.circle-svg { width: 100%; max-width: 420px; height: auto; }
+  .axis-line { stroke: var(--border); stroke-width: 1.5; }
+  .tick-line { stroke: var(--ink-soft); stroke-width: 1; }
+  .tick-label { font-size: 11px; fill: var(--ink-soft); font-family: 'JetBrains Mono', monospace; }
+  .unit-circle { fill: none; stroke: var(--ink); stroke-width: 2; }
+  .axis-point-label { font-size: 13px; fill: var(--ink); font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+  .angle-dot { fill: var(--card); stroke: var(--ink-soft); stroke-width: 1.5; cursor: pointer; }
+  .angle-dot:hover { stroke: var(--accent); stroke-width: 2.5; }
+  .angle-dot.correct { fill: var(--good); stroke: var(--good); }
+  .angle-dot.wrong-flash { fill: var(--bad); stroke: var(--bad); }
+  .angle-dot.selected { fill: var(--accent); stroke: var(--accent); }
+  .angle-dot.missed { fill: var(--card); stroke: #C98A00; stroke-width: 3; }
+  .terminal-line { stroke: var(--accent); stroke-width: 2; }
+  .angle-result-label { font-size: 13px; fill: var(--accent); font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+
+  .actions-row { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+  button {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 6px;
+    border: none;
+    padding: 10px 18px;
+    cursor: pointer;
+  }
+  button:hover { opacity: 0.88; }
+  .btn-primary { background: var(--ink); color: white; }
+  .btn-ghost { background: transparent; color: var(--ink-soft); border: 1px solid var(--border); }
+
+  .choices { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .choice-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    padding: 12px 20px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--paper);
+    color: var(--ink);
+    min-width: 76px;
+  }
+  .choice-btn:hover:not(:disabled) { border-color: var(--accent); }
+  .choice-btn.correct { border-color: var(--good); background: rgba(47,125,79,0.12); color: var(--good); font-weight: 600; }
+  .choice-btn.incorrect { border-color: var(--bad); background: rgba(178,58,46,0.12); color: var(--bad); font-weight: 600; }
+  .choice-btn:disabled { cursor: default; opacity: 0.85; }
+
+  .match-wrap { position: relative; display: flex; justify-content: space-between; gap: 40px; margin-top: 10px; }
+  .match-col { display: flex; flex-direction: column; gap: 10px; flex: 1; min-width: 0; }
+  .match-item {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    padding: 10px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--paper);
+    color: var(--ink);
+    text-align: left;
+    position: relative;
+    z-index: 2;
+  }
+  .match-item:hover:not(:disabled) { border-color: var(--accent); }
+  .match-item.selected { border-color: var(--accent); background: rgba(47,111,114,0.1); font-weight: 600; }
+  .match-item.matched { border-color: var(--good); background: rgba(47,125,79,0.12); color: var(--good); font-weight: 600; cursor: default; }
+  .match-item.wrong-flash { border-color: var(--bad); background: rgba(178,58,46,0.15); }
+  .match-item.decoy-used { opacity: 0.5; }
+  .connector-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+  .connector-line { stroke: var(--good); stroke-width: 2; }
+
+  .hint { font-size: 12.5px; color: var(--ink-soft); margin-top: 6px; }
+
+  .steps { margin-top: 16px; border-top: 1px solid var(--border); padding-top: 16px; }
+  .step-line {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .step-line:last-child { border-bottom: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="col">
+    <h1>Cercle trigonométrique</h1>
+    <p class="subtitle">Placer les angles, retrouver leurs valeurs trigonométriques, et relier les égalités.</p>
+    <p class="subtitle" style="font-style:italic;">Une feuille de brouillon à part est hautement conseillée pour vos calculs et réflexions.</p>
+
+    <div class="session-bar" id="sessionBar">
+      <div class="session-left">
+        <span>Manche <b id="sessionProgress">0/24</b></span>
+        <span class="hint" id="sessionHistory"></span>
+      </div>
+      <div class="session-right">
+        <label class="timer-toggle">
+          <input type="checkbox" id="timerEnableCheckbox"> Chronomètre
+        </label>
+        <span id="timerControls" style="display:none;">
+          <span class="timer-display" id="timerDisplay">00:00</span>
+          <button class="btn-ghost" id="timerStartBtn" type="button">Démarrer</button>
+          <button class="btn-ghost" id="timerResetBtn" type="button">Réinitialiser</button>
+        </span>
+      </div>
+    </div>
+
+    <div class="grade-banner" id="gradeBanner" style="display:none;">
+      <p class="grade-title" id="gradeTitle"></p>
+      <p class="grade-detail" id="gradeDetail"></p>
+      <div class="actions-row" style="justify-content:flex-end;">
+        <button class="btn-primary" id="gradeContinueBtn" type="button">Nouvelle manche</button>
+      </div>
+    </div>
+
+    <div class="tabs" id="tabs"></div>
+
+    <div class="panel" id="panel-session">
+      <div class="scorebox">
+        <div>Score <b id="sessScore">0/0</b></div>
+        <div>Série en cours <b id="sessStreak">0</b></div>
+      </div>
+      <div class="card">
+        <p class="sess-type-tag" id="sessTypeTag"></p>
+        <p class="prompt-text" id="sessPrompt"></p>
+        <p class="hint" id="sessHint" style="display:none;"></p>
+        <div class="circle-wrap" id="sessCircleWrap" style="display:none;">
+          <svg class="circle-svg" viewBox="0 0 440 440" id="sessSvg"></svg>
+        </div>
+        <div class="choices" id="sessChoices" style="display:none;"></div>
+        <p class="feedback" id="sessFeedback" style="display:none;"></p>
+        <div class="actions-row">
+          <button class="btn-primary" id="sessCheckBtn" type="button" style="display:none;">Vérifier</button>
+          <button class="btn-ghost" id="sessNextBtn" type="button">Question suivante</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-place">
+      <div class="scorebox">
+        <div>Score de cette page <b id="placeScore">0/0</b></div>
+        <div>Série en cours <b id="placeStreak">0</b></div>
+      </div>
+      <div class="card">
+        <p class="prompt-text" id="placePrompt"></p>
+        <div class="circle-wrap">
+          <svg class="circle-svg" viewBox="0 0 440 440" id="placeSvg"></svg>
+        </div>
+        <p class="feedback" id="placeFeedback" style="display:none;"></p>
+        <div class="actions-row">
+          <button class="btn-ghost" id="placeNextBtn" type="button">Angle suivant</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-quiz">
+      <div class="scorebox">
+        <div>Score de cette page <b id="quizScore">0/0</b></div>
+        <div>Série en cours <b id="quizStreak">0</b></div>
+      </div>
+      <div class="card">
+        <p class="prompt-text" id="quizPrompt"></p>
+        <div class="choices" id="quizChoices"></div>
+        <p class="feedback" id="quizFeedback" style="display:none;"></p>
+        <div class="actions-row">
+          <button class="btn-ghost" id="quizNextBtn" type="button">Question suivante</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-eq">
+      <div class="scorebox">
+        <div>Score de cette page <b id="eqScore">0/0</b></div>
+        <div>Série en cours <b id="eqStreak">0</b></div>
+      </div>
+      <div class="card">
+        <p class="hint" style="margin:0 0 10px;">Résolvez pour x, sans calculatrice.</p>
+        <p class="prompt-text" id="eqPrompt"></p>
+        <div class="choices" id="eqChoices"></div>
+        <p class="feedback" id="eqFeedback" style="display:none;"></p>
+        <div class="actions-row">
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn-ghost" id="eqRevealBtn" type="button">Étape suivante</button>
+          </div>
+          <button class="btn-ghost" id="eqNextBtn" type="button">Équation suivante</button>
+        </div>
+        <div class="steps" id="eqSteps" style="display:none;"></div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-solve">
+      <div class="scorebox">
+        <div>Score de cette page <b id="solveScore">0/0</b></div>
+        <div>Série en cours <b id="solveStreak">0</b></div>
+      </div>
+      <div class="card">
+        <p class="prompt-text" id="solvePrompt"></p>
+        <p class="hint" id="solveRangeHint"></p>
+        <div class="circle-wrap">
+          <svg class="circle-svg" viewBox="0 0 440 440" id="solveSvg"></svg>
+        </div>
+        <p class="feedback" id="solveFeedback" style="display:none;"></p>
+        <div class="actions-row">
+          <button class="btn-primary" id="solveCheckBtn" type="button">Vérifier</button>
+          <button class="btn-ghost" id="solveNextBtn" type="button">Équation suivante</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-match">
+      <div class="scorebox">
+        <div>Paires trouvées <b id="matchScore">0/0</b></div>
+        <div>Essais <b id="matchAttempts">0</b></div>
+      </div>
+      <div class="card">
+        <p class="prompt-text">Reliez chaque expression à sa valeur simplifiée.</p>
+        <p class="hint">Attention : deux valeurs à droite ne seront pas utilisées.</p>
+        <div class="match-wrap" id="matchWrap">
+          <svg class="connector-svg" id="matchSvg"></svg>
+          <div class="match-col" id="matchLeftCol"></div>
+          <div class="match-col" id="matchRightCol"></div>
+        </div>
+        <p class="feedback" id="matchFeedback" style="display:none;"></p>
+        <div class="actions-row">
+          <button class="btn-ghost" id="matchNextBtn" type="button">Nouvelle série</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---------- Helpers ----------
+  function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+  function svgEl(tag, attrs) {
+    const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (const k in attrs) el.setAttribute(k, attrs[k]);
+    return el;
+  }
+
+  // ---------- Shared trig data ----------
+  const ANGLES = [0, 30, 45, 60, 90, 120, 135, 150, 180, 210, 225, 240, 270, 300, 315, 330];
+
+  const VALUE_SYMBOLS = [
+    { key: '0', label: '0', num: 0 },
+    { key: '1', label: '1', num: 1 },
+    { key: '-1', label: '-1', num: -1 },
+    { key: 'half', label: '1/2', num: 0.5 },
+    { key: '-half', label: '-1/2', num: -0.5 },
+    { key: 'sqrt2half', label: '√2/2', num: Math.SQRT2 / 2 },
+    { key: '-sqrt2half', label: '-√2/2', num: -Math.SQRT2 / 2 },
+    { key: 'sqrt3half', label: '√3/2', num: Math.sqrt(3) / 2 },
+    { key: '-sqrt3half', label: '-√3/2', num: -Math.sqrt(3) / 2 },
+  ];
+  function symbolLabel(key) { return VALUE_SYMBOLS.find(v => v.key === key).label; }
+
+  const ANGLE_DATA = {
+    0: { sin: '0', cos: '1', tan: '0' },
+    30: { sin: 'half', cos: 'sqrt3half', tan: null },
+    45: { sin: 'sqrt2half', cos: 'sqrt2half', tan: '1' },
+    60: { sin: 'sqrt3half', cos: 'half', tan: null },
+    90: { sin: '1', cos: '0', tan: null },
+    120: { sin: 'sqrt3half', cos: '-half', tan: null },
+    135: { sin: 'sqrt2half', cos: '-sqrt2half', tan: '-1' },
+    150: { sin: 'half', cos: '-sqrt3half', tan: null },
+    180: { sin: '0', cos: '-1', tan: '0' },
+    210: { sin: '-half', cos: '-sqrt3half', tan: null },
+    225: { sin: '-sqrt2half', cos: '-sqrt2half', tan: '1' },
+    240: { sin: '-sqrt3half', cos: '-half', tan: null },
+    270: { sin: '-1', cos: '0', tan: null },
+    300: { sin: '-sqrt3half', cos: 'half', tan: null },
+    315: { sin: '-sqrt2half', cos: 'sqrt2half', tan: '-1' },
+    330: { sin: '-half', cos: 'sqrt3half', tan: null },
+  };
+
+  // ---------- Fraction / symbolic-value helpers (for simple trig equations) ----------
+  function gcd(a, b) {
+    a = Math.abs(a); b = Math.abs(b);
+    while (b) { const t = a % b; a = b; b = t; }
+    return a || 1;
+  }
+  function makeFrac(num, den) {
+    if (den < 0) { num = -num; den = -den; }
+    const g = gcd(num, den) || 1;
+    return { num: num / g, den: den / g };
+  }
+  function fracToStr(f) { return f.den === 1 ? `${f.num}` : `${f.num}/${f.den}`; }
+  function signedAfterFrac(f) {
+    const neg = f.num < 0;
+    const absFrac = { num: Math.abs(f.num), den: f.den };
+    return `${neg ? '-' : '+'} ${fracToStr(absFrac)}`;
+  }
+  // A trig value is either a plain rational, or a rational coefficient times √2 or √3
+  // (exactly the shapes every value in VALUE_SYMBOLS takes).
+  function symbolToInternal(key) {
+    const table = {
+      '0': { kind: 'rational', frac: { num: 0, den: 1 } },
+      '1': { kind: 'rational', frac: { num: 1, den: 1 } },
+      '-1': { kind: 'rational', frac: { num: -1, den: 1 } },
+      'half': { kind: 'rational', frac: { num: 1, den: 2 } },
+      '-half': { kind: 'rational', frac: { num: -1, den: 2 } },
+      'sqrt2half': { kind: 'root', root: 2, coef: { num: 1, den: 2 } },
+      '-sqrt2half': { kind: 'root', root: 2, coef: { num: -1, den: 2 } },
+      'sqrt3half': { kind: 'root', root: 3, coef: { num: 1, den: 2 } },
+      '-sqrt3half': { kind: 'root', root: 3, coef: { num: -1, den: 2 } },
+    };
+    return table[key];
+  }
+  function formatRoot(coefFrac, root) {
+    const sign = coefFrac.num < 0 ? '-' : '';
+    const absNum = Math.abs(coefFrac.num);
+    const numPart = absNum === 1 ? '' : `${absNum}`;
+    const body = `${numPart}√${root}`;
+    return coefFrac.den === 1 ? `${sign}${body}` : `${sign}${body}/${coefFrac.den}`;
+  }
+  function formatSymValue(symVal) {
+    return symVal.kind === 'rational' ? fracToStr(symVal.frac) : formatRoot(symVal.coef, symVal.root);
+  }
+  function divideSymValue(symVal, k) {
+    if (symVal.kind === 'rational') return { kind: 'rational', frac: makeFrac(symVal.frac.num, symVal.frac.den * k) };
+    return { kind: 'root', root: symVal.root, coef: makeFrac(symVal.coef.num, symVal.coef.den * k) };
+  }
+  function subtractFracFromRational(symVal, c) {
+    const f = symVal.frac;
+    return { kind: 'rational', frac: makeFrac(f.num * c.den - c.num * f.den, f.den * c.den) };
+  }
+  function perturbSymValue(symVal) {
+    if (symVal.kind === 'rational') {
+      const f = symVal.frac;
+      if (f.num === 0) {
+        // Sign-flip / scale tricks are all no-ops on 0, so use a fixed pool of
+        // clearly distinct nonzero values instead.
+        return [
+          { kind: 'rational', frac: { num: 1, den: 1 } },
+          { kind: 'rational', frac: { num: -1, den: 1 } },
+          { kind: 'rational', frac: { num: 1, den: 2 } },
+          { kind: 'rational', frac: { num: -1, den: 2 } },
+          { kind: 'root', root: 2, coef: { num: 1, den: 2 } },
+          { kind: 'root', root: 3, coef: { num: 1, den: 2 } },
+        ];
+      }
+      return [
+        { kind: 'rational', frac: makeFrac(-f.num, f.den) },
+        { kind: 'rational', frac: makeFrac(f.num + f.den, f.den) },
+        { kind: 'rational', frac: makeFrac(f.num - f.den, f.den) },
+        { kind: 'rational', frac: makeFrac(f.num, f.den + 1) },
+        { kind: 'rational', frac: makeFrac(f.num * 2, f.den) },
+        { kind: 'root', root: 2, coef: makeFrac(f.num, f.den) },
+      ];
+    }
+    const c = symVal.coef;
+    return [
+      { kind: 'root', root: symVal.root, coef: makeFrac(-c.num, c.den) },
+      { kind: 'root', root: symVal.root === 2 ? 3 : 2, coef: c },
+      { kind: 'root', root: symVal.root, coef: makeFrac(c.num, c.den + 1) },
+      { kind: 'rational', frac: makeFrac(c.num, c.den) },
+      { kind: 'root', root: symVal.root, coef: makeFrac(-c.num, c.den + 1) },
+      { kind: 'root', root: symVal.root, coef: makeFrac(c.num * 2, c.den) },
+    ];
+  }
+  function pickDistinct(correct, candidates, count) {
+    const seen = new Set([correct]);
+    const out = [];
+    for (const s of candidates) {
+      if (out.length >= count) break;
+      if (!seen.has(s)) { seen.add(s); out.push(s); }
+    }
+    return out;
+  }
+  function kxStr(k) { return k === 1 ? 'x' : k === -1 ? '-x' : `${k}x`; }
+
+  // ---------- Tabs ----------
+  const TABS = [
+    { key: 'session', label: 'Session (thèmes mélangés)' },
+    { key: 'place', label: 'Placer les angles' },
+    { key: 'quiz', label: 'Valeurs trigonométriques' },
+    { key: 'eq', label: 'Équations trigonométriques' },
+    { key: 'solve', label: 'Résoudre pour α' },
+    { key: 'match', label: 'Relier les égalités' },
+  ];
+  const tabsEl = document.getElementById('tabs');
+  function renderTabs(activeKey) {
+    tabsEl.innerHTML = '';
+    TABS.forEach(t => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'tab' + (t.key === activeKey ? ' active' : '');
+      btn.textContent = t.label;
+      btn.addEventListener('click', () => switchTab(t.key));
+      tabsEl.appendChild(btn);
+    });
+  }
+  function switchTab(key) {
+    TABS.forEach(t => {
+      document.getElementById('panel-' + t.key).classList.toggle('active', t.key === key);
+    });
+    renderTabs(key);
+    if (key === 'match') requestAnimationFrame(drawConnectors);
+  }
+
+  // ================= Part A: Place the angle on the circle =================
+  const CX = 220, CY = 220, R = 160, TICK_R = 80, DOT_R = 9;
+  let placeTarget = null;
+  let placeSolved = false;
+  let placeAttempts = 0;
+  let placeScore = { correct: 0, total: 0 };
+  let placeStreak = 0;
+
+  function angleToPx(angleDeg, radius) {
+    const rad = angleDeg * Math.PI / 180;
+    return { x: CX + radius * Math.cos(rad), y: CY - radius * Math.sin(rad) };
+  }
+
+  function drawCircleChrome(svg) {
+    // axes
+    svg.appendChild(svgEl('line', { x1: CX - R - 30, y1: CY, x2: CX + R + 30, y2: CY, class: 'axis-line' }));
+    svg.appendChild(svgEl('line', { x1: CX, y1: CY - R - 30, x2: CX, y2: CY + R + 30, class: 'axis-line' }));
+    // 0.5 ticks
+    [[TICK_R, 0], [-TICK_R, 0], [0, -TICK_R], [0, TICK_R]].forEach(([dx, dy]) => {
+      const x = CX + dx, y = CY + dy;
+      svg.appendChild(svgEl('line', { x1: x - (dy === 0 ? 0 : 5), y1: y - (dx === 0 ? 0 : 5), x2: x + (dy === 0 ? 0 : 5), y2: y + (dx === 0 ? 0 : 5), class: 'tick-line' }));
+      const label = svgEl('text', { x: dx !== 0 ? x : x + 6, y: dy !== 0 ? y - 6 : y + 18, class: 'tick-label', 'text-anchor': dx !== 0 ? 'middle' : 'start' });
+      label.textContent = dx > 0 || dy < 0 ? '0.5' : '-0.5';
+      svg.appendChild(label);
+    });
+    // unit circle
+    svg.appendChild(svgEl('circle', { cx: CX, cy: CY, r: R, class: 'unit-circle' }));
+    // E1..E4 labels
+    const axisPts = [
+      { angle: 0, name: 'E1' }, { angle: 90, name: 'E2' }, { angle: 180, name: 'E3' }, { angle: 270, name: 'E4' },
+    ];
+    axisPts.forEach(p => {
+      const pos = angleToPx(p.angle, R);
+      const lx = CX + (pos.x - CX) * 1.14, ly = CY + (pos.y - CY) * 1.14;
+      const label = svgEl('text', { x: lx, y: ly + 4, class: 'axis-point-label', 'text-anchor': 'middle' });
+      label.textContent = p.name;
+      svg.appendChild(label);
+    });
+  }
+
+  function buildPlaceSvg() {
+    const svg = document.getElementById('placeSvg');
+    svg.innerHTML = '';
+    drawCircleChrome(svg);
+    // terminal line + result label placeholders (added dynamically)
+    const terminalLine = svgEl('line', { id: 'terminalLine', class: 'terminal-line', x1: CX, y1: CY, x2: CX, y2: CY, style: 'display:none' });
+    svg.appendChild(terminalLine);
+    const resultLabel = svgEl('text', { id: 'resultLabel', class: 'angle-result-label', x: 0, y: 0, style: 'display:none' });
+    svg.appendChild(resultLabel);
+    // dots
+    ANGLES.forEach(a => {
+      const pos = angleToPx(a, R);
+      const dot = svgEl('circle', { cx: pos.x, cy: pos.y, r: DOT_R, class: 'angle-dot', 'data-angle': a });
+      dot.addEventListener('click', () => handlePlaceClick(a));
+      svg.appendChild(dot);
+    });
+  }
+
+  function newPlaceRound() {
+    let next;
+    do { next = ANGLES[randInt(0, ANGLES.length - 1)]; } while (next === placeTarget && ANGLES.length > 1);
+    placeTarget = next;
+    placeSolved = false;
+    placeAttempts = 0;
+    document.getElementById('placePrompt').textContent = `Placez l'angle α = ${placeTarget}°`;
+    const fb = document.getElementById('placeFeedback');
+    fb.style.display = 'none';
+    buildPlaceSvg();
+  }
+
+  function handlePlaceClick(clickedAngle) {
+    if (placeSolved) return;
+    placeAttempts++;
+    const svg = document.getElementById('placeSvg');
+    const dot = svg.querySelector(`.angle-dot[data-angle="${clickedAngle}"]`);
+    const fb = document.getElementById('placeFeedback');
+    if (clickedAngle === placeTarget) {
+      placeSolved = true;
+      dot.classList.add('correct');
+      const pos = angleToPx(placeTarget, R);
+      const line = svg.querySelector('#terminalLine');
+      line.setAttribute('x2', pos.x); line.setAttribute('y2', pos.y);
+      line.style.display = '';
+      const label = svg.querySelector('#resultLabel');
+      const lx = CX + (pos.x - CX) * 1.2, ly = CY + (pos.y - CY) * 1.2;
+      label.setAttribute('x', lx); label.setAttribute('y', ly);
+      label.setAttribute('text-anchor', 'middle');
+      label.textContent = `${placeTarget}°`;
+      label.style.display = '';
+      fb.style.display = '';
+      fb.className = 'feedback correct';
+      fb.textContent = placeAttempts === 1 ? 'Correct du premier coup !' : 'Correct.';
+      placeScore.total++;
+      if (placeAttempts === 1) { placeScore.correct++; placeStreak++; } else { placeStreak = 0; }
+      updatePlaceScore();
+      recordSessionAnswer(placeAttempts === 1);
+    } else {
+      dot.classList.add('wrong-flash');
+      setTimeout(() => dot.classList.remove('wrong-flash'), 400);
+      fb.style.display = '';
+      fb.className = 'feedback incorrect';
+      fb.textContent = "Ce n'est pas ça, réessayez.";
+    }
+  }
+
+  function updatePlaceScore() {
+    document.getElementById('placeScore').textContent = `${placeScore.correct}/${placeScore.total}`;
+    document.getElementById('placeStreak').textContent = `${placeStreak}`;
+  }
+
+  document.getElementById('placeNextBtn').addEventListener('click', newPlaceRound);
+
+  // ================= Part B: sin/cos/tan quiz =================
+  let quizCurrent = null;
+  let quizAnswered = false;
+  let quizScore = { correct: 0, total: 0 };
+  let quizStreak = 0;
+
+  function newQuizRound() {
+    const func = ['sin', 'cos', 'tan'][randInt(0, 2)];
+    let angle;
+    if (func === 'tan') {
+      const tanAngles = ANGLES.filter(a => ANGLE_DATA[a].tan !== null);
+      angle = tanAngles[randInt(0, tanAngles.length - 1)];
+    } else {
+      angle = ANGLES[randInt(0, ANGLES.length - 1)];
+    }
+    const correctKey = ANGLE_DATA[angle][func];
+    const distractorPool = VALUE_SYMBOLS.filter(v => v.key !== correctKey);
+    const distractors = shuffle(distractorPool).slice(0, 4);
+    const choices = shuffle([correctKey, ...distractors.map(d => d.key)]);
+    quizCurrent = { func, angle, correctKey, choices };
+    quizAnswered = false;
+    document.getElementById('quizPrompt').textContent = `${func}(${angle}°) = ?`;
+    document.getElementById('quizFeedback').style.display = 'none';
+    renderQuizChoices();
+  }
+
+  function renderQuizChoices() {
+    const el = document.getElementById('quizChoices');
+    el.innerHTML = '';
+    quizCurrent.choices.forEach(key => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'choice-btn';
+      btn.textContent = symbolLabel(key);
+      if (quizAnswered) {
+        btn.disabled = true;
+        if (key === quizCurrent.correctKey) btn.classList.add('correct');
+        else if (key === quizCurrent.selected) btn.classList.add('incorrect');
+      }
+      btn.addEventListener('click', () => handleQuizChoice(key));
+      el.appendChild(btn);
+    });
+  }
+
+  function handleQuizChoice(key) {
+    if (quizAnswered) return;
+    quizAnswered = true;
+    quizCurrent.selected = key;
+    const ok = key === quizCurrent.correctKey;
+    const fb = document.getElementById('quizFeedback');
+    fb.style.display = '';
+    fb.className = 'feedback ' + (ok ? 'correct' : 'incorrect');
+    fb.textContent = ok ? 'Correct.' : `Ce n'est pas ça. La bonne réponse : ${symbolLabel(quizCurrent.correctKey)}`;
+    quizScore.total++;
+    if (ok) { quizScore.correct++; quizStreak++; } else { quizStreak = 0; }
+    document.getElementById('quizScore').textContent = `${quizScore.correct}/${quizScore.total}`;
+    document.getElementById('quizStreak').textContent = `${quizStreak}`;
+    renderQuizChoices();
+    recordSessionAnswer(ok);
+  }
+
+  document.getElementById('quizNextBtn').addEventListener('click', newQuizRound);
+
+  // ================= Part A-bis: simple trig equations (Problem 4 style) =================
+  function genTrigEquation() {
+    const func = ['sin', 'cos'][randInt(0, 1)];
+    const angle = ANGLES[randInt(0, ANGLES.length - 1)];
+    let displayAngle = angle;
+    if (angle === 0 && Math.random() < 0.5) displayAngle = 360;
+    else if (angle !== 0 && Math.random() < 0.3) displayAngle = angle - 360;
+    const baseKey = ANGLE_DATA[angle][func];
+    const baseVal = symbolToInternal(baseKey);
+    const baseStr = formatSymValue(baseVal);
+
+    const availableVariants = baseVal.kind === 'rational' ? [1, 2, 3] : [1, 2];
+    const variant = availableVariants[randInt(0, availableVariants.length - 1)];
+
+    let eqStr, answerVal, steps;
+
+    if (variant === 1) {
+      eqStr = `${func}(${displayAngle}°) = x`;
+      answerVal = baseVal;
+      steps = [eqStr, `x = ${func}(${displayAngle}°) = ${baseStr}`];
+    } else if (variant === 2) {
+      let k;
+      do { k = randInt(-6, 6); } while (Math.abs(k) < 2);
+      eqStr = `${func}(${displayAngle}°) = ${kxStr(k)}`;
+      answerVal = divideSymValue(baseVal, k);
+      const baseWrapped = baseStr.includes('/') ? `(${baseStr})` : baseStr;
+      steps = [eqStr, `x = ${func}(${displayAngle}°)/${k} = ${baseWrapped}/${k}`, `x = ${formatSymValue(answerVal)}`];
+    } else {
+      const c = makeFrac(randInt(-3, 3) || 1, randInt(2, 4));
+      eqStr = `${func}(${displayAngle}°) = x ${signedAfterFrac(c)}`;
+      answerVal = subtractFracFromRational(baseVal, c);
+      const negC = makeFrac(-c.num, c.den);
+      steps = [eqStr, `x = ${func}(${displayAngle}°) ${signedAfterFrac(negC)} = ${baseStr} ${signedAfterFrac(negC)}`, `x = ${formatSymValue(answerVal)}`];
+    }
+
+    const correct = formatSymValue(answerVal);
+    const candidateVals = perturbSymValue(answerVal);
+    const candidates = candidateVals.map(formatSymValue);
+    const distractors = pickDistinct(correct, candidates, 4);
+    const choices = shuffle([correct, ...distractors]);
+
+    return { eqStr, steps, correctAnswer: correct, choices };
+  }
+
+  let eqCurrent = null;
+  let eqAnswered = false;
+  let eqRevealed = 0;
+  let eqScore = { correct: 0, total: 0 };
+  let eqStreak = 0;
+
+  function newEqRound() {
+    eqCurrent = genTrigEquation();
+    eqAnswered = false;
+    eqRevealed = 0;
+    document.getElementById('eqPrompt').textContent = eqCurrent.eqStr;
+    document.getElementById('eqFeedback').style.display = 'none';
+    renderEqChoices();
+    renderEqSteps();
+  }
+
+  function renderEqChoices() {
+    const el = document.getElementById('eqChoices');
+    el.innerHTML = '';
+    eqCurrent.choices.forEach(choiceStr => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'choice-btn';
+      btn.textContent = choiceStr;
+      if (eqAnswered) {
+        btn.disabled = true;
+        if (choiceStr === eqCurrent.correctAnswer) btn.classList.add('correct');
+        else if (choiceStr === eqCurrent.selected) btn.classList.add('incorrect');
+      }
+      btn.addEventListener('click', () => handleEqChoice(choiceStr));
+      el.appendChild(btn);
+    });
+  }
+
+  function handleEqChoice(choiceStr) {
+    if (eqAnswered) return;
+    eqAnswered = true;
+    eqCurrent.selected = choiceStr;
+    const ok = choiceStr === eqCurrent.correctAnswer;
+    const fb = document.getElementById('eqFeedback');
+    fb.style.display = '';
+    fb.className = 'feedback ' + (ok ? 'correct' : 'incorrect');
+    fb.textContent = ok ? 'Correct.' : `Ce n'est pas ça. La bonne réponse : ${eqCurrent.correctAnswer}`;
+    eqScore.total++;
+    if (ok) { eqScore.correct++; eqStreak++; } else { eqStreak = 0; }
+    document.getElementById('eqScore').textContent = `${eqScore.correct}/${eqScore.total}`;
+    document.getElementById('eqStreak').textContent = `${eqStreak}`;
+    renderEqChoices();
+    recordSessionAnswer(ok);
+  }
+
+  function renderEqSteps() {
+    const el = document.getElementById('eqSteps');
+    const revealBtn = document.getElementById('eqRevealBtn');
+    revealBtn.disabled = eqRevealed >= eqCurrent.steps.length;
+    if (eqRevealed > 0) {
+      el.style.display = '';
+      el.innerHTML = '';
+      eqCurrent.steps.slice(0, eqRevealed).forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'step-line';
+        div.textContent = s;
+        el.appendChild(div);
+      });
+    } else {
+      el.style.display = 'none';
+    }
+  }
+
+  document.getElementById('eqRevealBtn').addEventListener('click', () => {
+    eqRevealed = Math.min(eqRevealed + 1, eqCurrent.steps.length);
+    renderEqSteps();
+  });
+  document.getElementById('eqNextBtn').addEventListener('click', newEqRound);
+
+  // ================= Part D: solve trig(α) = value for α (Problem 5 style) =================
+  function angleLabelForRange(angle, rangeMode) {
+    const a = rangeMode === 'sym180' && angle > 180 ? angle - 360 : angle;
+    return `${a}°`;
+  }
+
+  function genSolveAngle() {
+    const func = ['sin', 'cos', 'tan'][randInt(0, 2)];
+    let valueKey, solutionAngles;
+    if (func === 'tan') {
+      const validKeys = ['0', '1', '-1'];
+      valueKey = validKeys[randInt(0, validKeys.length - 1)];
+      solutionAngles = ANGLES.filter(a => ANGLE_DATA[a].tan === valueKey);
+    } else {
+      const achievableKeys = Array.from(new Set(ANGLES.map(a => ANGLE_DATA[a][func])));
+      valueKey = achievableKeys[randInt(0, achievableKeys.length - 1)];
+      solutionAngles = ANGLES.filter(a => ANGLE_DATA[a][func] === valueKey);
+    }
+    const rangeMode = Math.random() < 0.5 ? 'pos360' : 'sym180';
+    return { func, valueKey, solutionAngles, rangeMode };
+  }
+
+  let solveCurrent = null;
+  let solveSelected = new Set();
+  let solveAnswered = false;
+  let solveScore = { correct: 0, total: 0 };
+  let solveStreak = 0;
+
+  function buildSolveSvg() {
+    const svg = document.getElementById('solveSvg');
+    svg.innerHTML = '';
+    drawCircleChrome(svg);
+    ANGLES.forEach(a => {
+      const pos = angleToPx(a, R);
+      const dot = svgEl('circle', { cx: pos.x, cy: pos.y, r: DOT_R, class: 'angle-dot', 'data-angle': a });
+      dot.addEventListener('click', () => toggleSolveDot(a));
+      svg.appendChild(dot);
+    });
+    renderSolveDotStates();
+  }
+
+  function renderSolveDotStates() {
+    const svg = document.getElementById('solveSvg');
+    ANGLES.forEach(a => {
+      const dot = svg.querySelector(`.angle-dot[data-angle="${a}"]`);
+      if (!dot) return;
+      dot.classList.remove('correct', 'wrong-flash', 'selected', 'missed');
+      if (!solveAnswered) {
+        if (solveSelected.has(a)) dot.classList.add('selected');
+      } else {
+        const isCorrect = solveCurrent.solutionAngles.includes(a);
+        const isSelected = solveSelected.has(a);
+        if (isCorrect && isSelected) dot.classList.add('correct');
+        else if (!isCorrect && isSelected) dot.classList.add('wrong-flash');
+        else if (isCorrect && !isSelected) dot.classList.add('missed');
+      }
+    });
+  }
+
+  function toggleSolveDot(angle) {
+    if (solveAnswered) return;
+    if (solveSelected.has(angle)) solveSelected.delete(angle); else solveSelected.add(angle);
+    renderSolveDotStates();
+  }
+
+  function newSolveRound() {
+    solveCurrent = genSolveAngle();
+    solveSelected = new Set();
+    solveAnswered = false;
+    const rangeText = solveCurrent.rangeMode === 'pos360' ? '0° < α < 360°' : '−180° < α ≤ 180°';
+    document.getElementById('solvePrompt').textContent = `${solveCurrent.func}(α) = ${symbolLabel(solveCurrent.valueKey)}`;
+    document.getElementById('solveRangeHint').textContent = `Pour ${rangeText}. Cliquez sur toutes les solutions puis validez (il peut y en avoir plusieurs).`;
+    document.getElementById('solveFeedback').style.display = 'none';
+    buildSolveSvg();
+  }
+
+  function handleSolveSubmit() {
+    if (solveAnswered) return;
+    solveAnswered = true;
+    const correctSet = new Set(solveCurrent.solutionAngles);
+    const isExactMatch = solveSelected.size === correctSet.size && Array.from(solveSelected).every(a => correctSet.has(a));
+    renderSolveDotStates();
+    const fb = document.getElementById('solveFeedback');
+    fb.style.display = '';
+    fb.className = 'feedback ' + (isExactMatch ? 'correct' : 'incorrect');
+    const labels = solveCurrent.solutionAngles.map(a => `α = ${angleLabelForRange(a, solveCurrent.rangeMode)}`).join(' ou ');
+    fb.textContent = isExactMatch ? 'Correct.' : `Ce n'est pas ça. La bonne réponse : ${labels}`;
+    solveScore.total++;
+    if (isExactMatch) { solveScore.correct++; solveStreak++; } else { solveStreak = 0; }
+    document.getElementById('solveScore').textContent = `${solveScore.correct}/${solveScore.total}`;
+    document.getElementById('solveStreak').textContent = `${solveStreak}`;
+    recordSessionAnswer(isExactMatch);
+  }
+
+  document.getElementById('solveCheckBtn').addEventListener('click', handleSolveSubmit);
+  document.getElementById('solveNextBtn').addEventListener('click', newSolveRound);
+
+  // ================= Part C: matching game =================
+  const IDENTITY_POOL = [
+    { left: 'sin(180° − α)', right: 'sin(α)' },
+    { left: 'cos(180° − α)', right: '−cos(α)' },
+    { left: 'sin(−α)', right: '−sin(α)' },
+    { left: 'cos(−α)', right: 'cos(α)' },
+    { left: 'sin(180° + α)', right: '−sin(α)' },
+    { left: 'cos(180° + α)', right: '−cos(α)' },
+    { left: 'tan(180° − α)', right: '−tan(α)' },
+    { left: 'tan(−α)', right: '−tan(α)' },
+    { left: 'tan(180° + α)', right: 'tan(α)' },
+    { left: 'sin(90° − α)', right: 'cos(α)' },
+    { left: 'cos(90° − α)', right: 'sin(α)' },
+  ];
+  const DECOY_POOL = ['sin(α)', 'cos(α)', '−sin(α)', '−cos(α)', 'tan(α)', '−tan(α)'];
+  const MATCH_COUNT = 4;
+
+  let matchLeft = [], matchRight = [];
+  let matchSelectedLeft = null;
+  let matchedPairs = []; // { leftId, rightId }
+  let matchAttempts = 0;
+
+  function newMatchRound() {
+    const shuffledPool = shuffle(IDENTITY_POOL);
+    const chosen = [];
+    const usedRights = new Set();
+    for (const item of shuffledPool) {
+      if (chosen.length >= MATCH_COUNT) break;
+      if (usedRights.has(item.right)) continue;
+      chosen.push(item);
+      usedRights.add(item.right);
+    }
+    const decoyPoolFiltered = DECOY_POOL.filter(d => !usedRights.has(d));
+    const decoys = shuffle(decoyPoolFiltered).slice(0, DECOY_POOL.length - chosen.length);
+    matchLeft = shuffle(chosen).map((it, idx) => ({ id: 'L' + idx, text: it.left, matchRight: it.right }));
+    const rightRaw = shuffle([...chosen.map(it => it.right), ...decoys]);
+    matchRight = rightRaw.map((text, idx) => ({ id: 'R' + idx, text }));
+    matchSelectedLeft = null;
+    matchedPairs = [];
+    matchAttempts = 0;
+    document.getElementById('matchFeedback').style.display = 'none';
+    renderMatch();
+  }
+
+  function renderMatch() {
+    const leftCol = document.getElementById('matchLeftCol');
+    const rightCol = document.getElementById('matchRightCol');
+    leftCol.innerHTML = '';
+    rightCol.innerHTML = '';
+    matchLeft.forEach(item => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      const isMatched = matchedPairs.some(p => p.leftId === item.id);
+      btn.className = 'match-item' + (isMatched ? ' matched' : (item.id === matchSelectedLeft ? ' selected' : ''));
+      btn.textContent = item.text;
+      btn.disabled = isMatched;
+      btn.addEventListener('click', () => handleLeftClick(item.id));
+      leftCol.appendChild(btn);
+    });
+    matchRight.forEach(item => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      const isMatched = matchedPairs.some(p => p.rightId === item.id);
+      btn.className = 'match-item' + (isMatched ? ' matched' : '');
+      btn.textContent = item.text;
+      btn.disabled = isMatched;
+      btn.dataset.rid = item.id;
+      btn.addEventListener('click', () => handleRightClick(item.id));
+      rightCol.appendChild(btn);
+    });
+    document.getElementById('matchScore').textContent = `${matchedPairs.length}/${MATCH_COUNT}`;
+    document.getElementById('matchAttempts').textContent = `${matchAttempts}`;
+    requestAnimationFrame(drawConnectors);
+    if (matchedPairs.length === MATCH_COUNT) {
+      const fb = document.getElementById('matchFeedback');
+      fb.style.display = '';
+      fb.className = 'feedback correct';
+      fb.textContent = `Terminé ! ${matchAttempts} essai(s) au total.`;
+    }
+  }
+
+  function handleLeftClick(id) {
+    if (matchedPairs.some(p => p.leftId === id)) return;
+    matchSelectedLeft = id;
+    renderMatch();
+  }
+
+  function handleRightClick(rid) {
+    if (!matchSelectedLeft) return;
+    if (matchedPairs.some(p => p.rightId === rid)) return;
+    const leftItem = matchLeft.find(l => l.id === matchSelectedLeft);
+    const rightItem = matchRight.find(r => r.id === rid);
+    matchAttempts++;
+    if (leftItem.matchRight === rightItem.text) {
+      matchedPairs.push({ leftId: leftItem.id, rightId: rid });
+      matchSelectedLeft = null;
+      renderMatch();
+    } else {
+      const rightCol = document.getElementById('matchRightCol');
+      const btn = rightCol.querySelector(`[data-rid="${rid}"]`);
+      if (btn) {
+        btn.classList.add('wrong-flash');
+        setTimeout(() => btn.classList.remove('wrong-flash'), 400);
+      }
+      document.getElementById('matchAttempts').textContent = `${matchAttempts}`;
+    }
+  }
+
+  function drawConnectors() {
+    const svg = document.getElementById('matchSvg');
+    const wrap = document.getElementById('matchWrap');
+    if (!svg || !wrap) return;
+    const wrapRect = wrap.getBoundingClientRect();
+    svg.setAttribute('width', wrapRect.width);
+    svg.setAttribute('height', wrapRect.height);
+    svg.innerHTML = '';
+    matchedPairs.forEach(pair => {
+      const leftBtn = Array.from(document.getElementById('matchLeftCol').children)
+        .find((b, i) => matchLeft[i] && matchLeft[i].id === pair.leftId);
+      const rightBtn = document.getElementById('matchRightCol').querySelector(`[data-rid="${pair.rightId}"]`);
+      if (!leftBtn || !rightBtn) return;
+      const lr = leftBtn.getBoundingClientRect(), rr = rightBtn.getBoundingClientRect();
+      const x1 = lr.right - wrapRect.left, y1 = lr.top + lr.height / 2 - wrapRect.top;
+      const x2 = rr.left - wrapRect.left, y2 = rr.top + rr.height / 2 - wrapRect.top;
+      svg.appendChild(svgEl('line', { x1, y1, x2, y2, class: 'connector-line' }));
+    });
+  }
+
+  document.getElementById('matchNextBtn').addEventListener('click', newMatchRound);
+  window.addEventListener('resize', () => {
+    if (document.getElementById('panel-match').classList.contains('active')) drawConnectors();
+  });
+
+  // ================= Session mode: random question from any theme =================
+  const SESSION_TYPES = ['place', 'quiz', 'eq', 'solve'];
+  const SESS_TYPE_LABELS = { place: 'Placer un angle', quiz: 'Valeur trigonométrique', eq: 'Équation trigonométrique', solve: 'Résoudre pour α' };
+  let sessCurrent = null;
+  let sessAnswered = false;
+  let sessSelected = new Set();
+  let sessScore = { correct: 0, total: 0 };
+  let sessStreak = 0;
+
+  function genQuizQuestion() {
+    const func = ['sin', 'cos', 'tan'][randInt(0, 2)];
+    let angle;
+    if (func === 'tan') {
+      const tanAngles = ANGLES.filter(a => ANGLE_DATA[a].tan !== null);
+      angle = tanAngles[randInt(0, tanAngles.length - 1)];
+    } else {
+      angle = ANGLES[randInt(0, ANGLES.length - 1)];
+    }
+    const correctKey = ANGLE_DATA[angle][func];
+    const distractorPool = VALUE_SYMBOLS.filter(v => v.key !== correctKey);
+    const distractors = shuffle(distractorPool).slice(0, 4);
+    const choices = shuffle([correctKey, ...distractors.map(d => d.key)]);
+    return { func, angle, correctKey, choices };
+  }
+
+  function finishSessQuestion(isCorrect) {
+    sessScore.total++;
+    if (isCorrect) { sessScore.correct++; sessStreak++; } else { sessStreak = 0; }
+    document.getElementById('sessScore').textContent = `${sessScore.correct}/${sessScore.total}`;
+    document.getElementById('sessStreak').textContent = `${sessStreak}`;
+    recordSessionAnswer(isCorrect);
+  }
+
+  function lockSessChoices(correctText, selectedText) {
+    Array.from(document.getElementById('sessChoices').children).forEach(btn => {
+      btn.disabled = true;
+      if (btn.textContent === correctText) btn.classList.add('correct');
+      else if (btn.textContent === selectedText) btn.classList.add('incorrect');
+    });
+  }
+
+  function buildSessPlaceSvg() {
+    const svg = document.getElementById('sessSvg');
+    svg.innerHTML = '';
+    drawCircleChrome(svg);
+    const terminalLine = svgEl('line', { id: 'sessTerminalLine', class: 'terminal-line', x1: CX, y1: CY, x2: CX, y2: CY, style: 'display:none' });
+    svg.appendChild(terminalLine);
+    const resultLabel = svgEl('text', { id: 'sessResultLabel', class: 'angle-result-label', x: 0, y: 0, style: 'display:none' });
+    svg.appendChild(resultLabel);
+    ANGLES.forEach(a => {
+      const pos = angleToPx(a, R);
+      const dot = svgEl('circle', { cx: pos.x, cy: pos.y, r: DOT_R, class: 'angle-dot', 'data-angle': a });
+      dot.addEventListener('click', () => handleSessPlaceClick(a));
+      svg.appendChild(dot);
+    });
+  }
+
+  function handleSessPlaceClick(clickedAngle) {
+    if (sessAnswered) return;
+    sessCurrent.attempts++;
+    const svg = document.getElementById('sessSvg');
+    const dot = svg.querySelector(`.angle-dot[data-angle="${clickedAngle}"]`);
+    const fb = document.getElementById('sessFeedback');
+    if (clickedAngle === sessCurrent.targetAngle) {
+      sessAnswered = true;
+      dot.classList.add('correct');
+      const pos = angleToPx(sessCurrent.targetAngle, R);
+      const line = svg.querySelector('#sessTerminalLine');
+      line.setAttribute('x2', pos.x); line.setAttribute('y2', pos.y);
+      line.style.display = '';
+      const label = svg.querySelector('#sessResultLabel');
+      const lx = CX + (pos.x - CX) * 1.2, ly = CY + (pos.y - CY) * 1.2;
+      label.setAttribute('x', lx); label.setAttribute('y', ly);
+      label.setAttribute('text-anchor', 'middle');
+      label.textContent = `${sessCurrent.targetAngle}°`;
+      label.style.display = '';
+      fb.style.display = '';
+      fb.className = 'feedback correct';
+      fb.textContent = sessCurrent.attempts === 1 ? 'Correct du premier coup !' : 'Correct.';
+      finishSessQuestion(sessCurrent.attempts === 1);
+    } else {
+      dot.classList.add('wrong-flash');
+      setTimeout(() => dot.classList.remove('wrong-flash'), 400);
+      fb.style.display = '';
+      fb.className = 'feedback incorrect';
+      fb.textContent = "Ce n'est pas ça, réessayez.";
+    }
+  }
+
+  function buildSessSolveSvg() {
+    const svg = document.getElementById('sessSvg');
+    svg.innerHTML = '';
+    drawCircleChrome(svg);
+    ANGLES.forEach(a => {
+      const pos = angleToPx(a, R);
+      const dot = svgEl('circle', { cx: pos.x, cy: pos.y, r: DOT_R, class: 'angle-dot', 'data-angle': a });
+      dot.addEventListener('click', () => toggleSessSolveDot(a));
+      svg.appendChild(dot);
+    });
+    renderSessSolveDotStates();
+  }
+
+  function renderSessSolveDotStates() {
+    const svg = document.getElementById('sessSvg');
+    ANGLES.forEach(a => {
+      const dot = svg.querySelector(`.angle-dot[data-angle="${a}"]`);
+      if (!dot) return;
+      dot.classList.remove('correct', 'wrong-flash', 'selected', 'missed');
+      if (!sessAnswered) {
+        if (sessSelected.has(a)) dot.classList.add('selected');
+      } else {
+        const isCorrect = sessCurrent.solutionAngles.includes(a);
+        const isSelected = sessSelected.has(a);
+        if (isCorrect && isSelected) dot.classList.add('correct');
+        else if (!isCorrect && isSelected) dot.classList.add('wrong-flash');
+        else if (isCorrect && !isSelected) dot.classList.add('missed');
+      }
+    });
+  }
+
+  function toggleSessSolveDot(angle) {
+    if (sessAnswered) return;
+    if (sessSelected.has(angle)) sessSelected.delete(angle); else sessSelected.add(angle);
+    renderSessSolveDotStates();
+  }
+
+  function handleSessCheck() {
+    if (!sessCurrent || sessCurrent.type !== 'solve' || sessAnswered) return;
+    sessAnswered = true;
+    const correctSet = new Set(sessCurrent.solutionAngles);
+    const isExactMatch = sessSelected.size === correctSet.size && Array.from(sessSelected).every(a => correctSet.has(a));
+    renderSessSolveDotStates();
+    const fb = document.getElementById('sessFeedback');
+    fb.style.display = '';
+    fb.className = 'feedback ' + (isExactMatch ? 'correct' : 'incorrect');
+    const labels = sessCurrent.solutionAngles.map(a => `α = ${angleLabelForRange(a, sessCurrent.rangeMode)}`).join(' ou ');
+    fb.textContent = isExactMatch ? 'Correct.' : `Ce n'est pas ça. La bonne réponse : ${labels}`;
+    finishSessQuestion(isExactMatch);
+  }
+
+  function renderSessChoicesQuiz() {
+    const el = document.getElementById('sessChoices');
+    el.innerHTML = '';
+    sessCurrent.choices.forEach(key => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'choice-btn';
+      btn.textContent = symbolLabel(key);
+      btn.addEventListener('click', () => handleSessQuizChoice(key));
+      el.appendChild(btn);
+    });
+  }
+
+  function handleSessQuizChoice(key) {
+    if (sessAnswered) return;
+    sessAnswered = true;
+    const ok = key === sessCurrent.correctKey;
+    const fb = document.getElementById('sessFeedback');
+    fb.style.display = '';
+    fb.className = 'feedback ' + (ok ? 'correct' : 'incorrect');
+    fb.textContent = ok ? 'Correct.' : `Ce n'est pas ça. La bonne réponse : ${symbolLabel(sessCurrent.correctKey)}`;
+    lockSessChoices(symbolLabel(sessCurrent.correctKey), symbolLabel(key));
+    finishSessQuestion(ok);
+  }
+
+  function renderSessChoicesEq() {
+    const el = document.getElementById('sessChoices');
+    el.innerHTML = '';
+    sessCurrent.choices.forEach(choiceStr => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'choice-btn';
+      btn.textContent = choiceStr;
+      btn.addEventListener('click', () => handleSessEqChoice(choiceStr));
+      el.appendChild(btn);
+    });
+  }
+
+  function handleSessEqChoice(choiceStr) {
+    if (sessAnswered) return;
+    sessAnswered = true;
+    const ok = choiceStr === sessCurrent.correctAnswer;
+    const fb = document.getElementById('sessFeedback');
+    fb.style.display = '';
+    fb.className = 'feedback ' + (ok ? 'correct' : 'incorrect');
+    fb.textContent = ok ? 'Correct.' : `Ce n'est pas ça. La bonne réponse : ${sessCurrent.correctAnswer}`;
+    lockSessChoices(sessCurrent.correctAnswer, choiceStr);
+    finishSessQuestion(ok);
+  }
+
+  function renderSession() {
+    const type = sessCurrent.type;
+    document.getElementById('sessTypeTag').textContent = SESS_TYPE_LABELS[type];
+    const circleWrap = document.getElementById('sessCircleWrap');
+    const choicesWrap = document.getElementById('sessChoices');
+    const checkBtn = document.getElementById('sessCheckBtn');
+    const hintEl = document.getElementById('sessHint');
+    const promptEl = document.getElementById('sessPrompt');
+    document.getElementById('sessFeedback').style.display = 'none';
+
+    if (type === 'place') {
+      promptEl.textContent = `Placez l'angle α = ${sessCurrent.targetAngle}°`;
+      hintEl.style.display = 'none';
+      circleWrap.style.display = '';
+      choicesWrap.style.display = 'none';
+      checkBtn.style.display = 'none';
+      buildSessPlaceSvg();
+    } else if (type === 'solve') {
+      promptEl.textContent = `${sessCurrent.func}(α) = ${symbolLabel(sessCurrent.valueKey)}`;
+      const rangeText = sessCurrent.rangeMode === 'pos360' ? '0° < α < 360°' : '−180° < α ≤ 180°';
+      hintEl.textContent = `Pour ${rangeText}. Cliquez sur toutes les solutions puis validez (il peut y en avoir plusieurs).`;
+      hintEl.style.display = '';
+      circleWrap.style.display = '';
+      choicesWrap.style.display = 'none';
+      checkBtn.style.display = '';
+      buildSessSolveSvg();
+    } else if (type === 'quiz') {
+      promptEl.textContent = `${sessCurrent.func}(${sessCurrent.angle}°) = ?`;
+      hintEl.style.display = 'none';
+      circleWrap.style.display = 'none';
+      choicesWrap.style.display = '';
+      checkBtn.style.display = 'none';
+      renderSessChoicesQuiz();
+    } else {
+      promptEl.textContent = sessCurrent.eqStr;
+      hintEl.textContent = 'Résolvez pour x, sans calculatrice.';
+      hintEl.style.display = '';
+      circleWrap.style.display = 'none';
+      choicesWrap.style.display = '';
+      checkBtn.style.display = 'none';
+      renderSessChoicesEq();
+    }
+  }
+
+  function newSessionRound() {
+    const type = SESSION_TYPES[randInt(0, SESSION_TYPES.length - 1)];
+    sessAnswered = false;
+    sessSelected = new Set();
+    if (type === 'place') {
+      sessCurrent = { type, targetAngle: ANGLES[randInt(0, ANGLES.length - 1)], attempts: 0 };
+    } else if (type === 'quiz') {
+      sessCurrent = { type, ...genQuizQuestion() };
+    } else if (type === 'eq') {
+      sessCurrent = { type, ...genTrigEquation() };
+    } else {
+      sessCurrent = { type, ...genSolveAngle() };
+    }
+    renderSession();
+  }
+
+  document.getElementById('sessCheckBtn').addEventListener('click', handleSessCheck);
+  document.getElementById('sessNextBtn').addEventListener('click', newSessionRound);
+
+  // ---------- Global session scoring & grading ----------
+  const SESSION_TARGET = 24;
+  let sessionScore = { correct: 0, total: 0 };
+  let gradeHistory = [];
+
+  function computeGrade(correct, total) {
+    const ratio = correct / total;
+    const raw = 4.8 * Math.pow(ratio, 1.3) + 1.3;
+    const rounded = Math.round(raw * 2) / 2;
+    return Math.min(6, Math.max(1, rounded));
+  }
+  function gradeComment(note) {
+    if (note >= 6) return 'excellent';
+    if (note >= 5.5) return 'très bien';
+    if (note >= 5) return 'pas mal';
+    if (note >= 4.5) return 'satisfaisant';
+    if (note >= 4) return 'satisfaisant de justesse';
+    return 'insuffisant';
+  }
+  function formatGrade(note) {
+    return note % 1 === 0 ? `${note}.0` : `${note}`;
+  }
+
+  function updateSessionBar() {
+    document.getElementById('sessionProgress').textContent = `${sessionScore.total}/${SESSION_TARGET}`;
+    document.getElementById('sessionHistory').textContent = gradeHistory.length
+      ? `Manches précédentes : ${gradeHistory.join(', ')}`
+      : '';
+  }
+
+  function recordSessionAnswer(isCorrect) {
+    sessionScore.total++;
+    if (isCorrect) sessionScore.correct++;
+    updateSessionBar();
+    if (sessionScore.total >= SESSION_TARGET) showGrade();
+  }
+
+  function showGrade() {
+    const note = computeGrade(sessionScore.correct, sessionScore.total);
+    const comment = gradeComment(note);
+    gradeHistory.push(formatGrade(note));
+    document.getElementById('gradeTitle').textContent = `Note : ${formatGrade(note)} / 6 — ${comment}`;
+    document.getElementById('gradeDetail').textContent = `${sessionScore.correct} bonnes réponses sur ${sessionScore.total}.`;
+    document.getElementById('gradeBanner').style.display = '';
+  }
+
+  document.getElementById('gradeContinueBtn').addEventListener('click', () => {
+    sessionScore = { correct: 0, total: 0 };
+    document.getElementById('gradeBanner').style.display = 'none';
+    updateSessionBar();
+  });
+
+  // ---------- Optional stopwatch ----------
+  let timerRunning = false;
+  let timerElapsedMs = 0;
+  let timerStartTs = 0;
+  let timerInterval = null;
+
+  function formatTime(ms) {
+    const totalSec = Math.floor(ms / 1000);
+    const mm = String(Math.floor(totalSec / 60)).padStart(2, '0');
+    const ss = String(totalSec % 60).padStart(2, '0');
+    return `${mm}:${ss}`;
+  }
+  function tickTimer() {
+    const elapsed = timerElapsedMs + (Date.now() - timerStartTs);
+    document.getElementById('timerDisplay').textContent = formatTime(elapsed);
+  }
+  document.getElementById('timerEnableCheckbox').addEventListener('change', e => {
+    document.getElementById('timerControls').style.display = e.target.checked ? '' : 'none';
+    if (!e.target.checked) {
+      if (timerInterval) clearInterval(timerInterval);
+      timerRunning = false;
+      timerElapsedMs = 0;
+      document.getElementById('timerDisplay').textContent = '00:00';
+      document.getElementById('timerStartBtn').textContent = 'Démarrer';
+    }
+  });
+  document.getElementById('timerStartBtn').addEventListener('click', () => {
+    if (!timerRunning) {
+      timerRunning = true;
+      timerStartTs = Date.now();
+      timerInterval = setInterval(tickTimer, 500);
+      document.getElementById('timerStartBtn').textContent = 'Arrêter';
+    } else {
+      timerRunning = false;
+      timerElapsedMs += Date.now() - timerStartTs;
+      clearInterval(timerInterval);
+      document.getElementById('timerStartBtn').textContent = 'Démarrer';
+    }
+  });
+  document.getElementById('timerResetBtn').addEventListener('click', () => {
+    timerElapsedMs = 0;
+    timerStartTs = Date.now();
+    document.getElementById('timerDisplay').textContent = '00:00';
+  });
+
+  // ---------- Init ----------
+  newSessionRound();
+  newPlaceRound();
+  newQuizRound();
+  newEqRound();
+  newSolveRound();
+  newMatchRound();
+  switchTab('session');
+})();
+</script>
+</body>
+</html>
